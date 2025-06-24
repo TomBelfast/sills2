@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Upload Contract</h2>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Animacja ładowania -->
+                    <div id="loading" class="text-center" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Processing contract with AI. Please wait...</p>
+                    </div>
+
+                    <form id="uploadForm" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="contract_file" class="form-label">Select Contract Image</label>
+                            <input type="file" 
+                                   class="form-control" 
+                                   id="contract_file" 
+                                   name="contract_file"
+                                   accept=".png,.jpg,.jpeg,.gif,.pdf"
+                                   required>
+                            <div class="invalid-feedback">
+                                Please select a file
+                            </div>
+                            <small class="form-text text-muted">
+                                Allowed formats: PNG, JPG, JPEG, GIF, PDF
+                            </small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                Upload and Analyze
+                            </button>
+                            <a href="{{ url_for('clients') }}" class="btn btn-secondary">
+                                Back
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Client-side form validation
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                } else {
+                    // Pokaż animację ładowania
+                    document.getElementById('loading').style.display = 'block';
+                    document.getElementById('submitBtn').disabled = true;
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+</script>
+{% endblock %} 

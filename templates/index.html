@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Strona główna{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <h2>Lista klientów</h2>
+    {% if clients %}
+        <div class="list-group">
+            {% for client in clients %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">{{ client.first_name }} {{ client.last_name }}</h5>
+                            <p class="mb-1">{{ client.address }}</p>
+                            <small>Tel: {{ client.phone }}</small>
+                        </div>
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ client.address|urlencode }}+{{ client.postal_code|urlencode }}" 
+                           target="_blank" 
+                           class="btn btn-primary btn-sm"
+                           title="Pokaż na mapie">
+                            <i class="fas fa-map-marker-alt"></i> Mapa
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% if pagination.pages > 1 %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination">
+                    {% for page in pagination.iter_pages() %}
+                        {% if page %}
+                            <li class="page-item {% if page == pagination.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('index', page=page) }}">{{ page }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <p>Brak klientów w bazie danych.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Dodaj Font Awesome dla ikony mapy -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}

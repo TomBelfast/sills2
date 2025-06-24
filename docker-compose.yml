@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  sills:
+    build: .
+    ports:
+      - "55555:55555"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - PYTHONPATH=/app
+    restart: unless-stopped
+    volumes:
+      - sills_data:/app/instance
+      - sills_uploads:/app/uploads
+      - sills_static_uploads:/app/static/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:55555/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  sills_data:
+  sills_uploads:
+  sills_static_uploads: 

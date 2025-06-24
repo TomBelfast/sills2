@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+{% block title %}Cutting Layout{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Cutting Layout for client: {{ client.first_name }} {{ client.last_name }}</h1>
+    <div class="alert alert-info mb-4">
+        <strong>Note:</strong> All dimensions include cutting allowance of {{ settings.cutting_allowance if settings else '2.0' }}mm. 
+        <small class="text-muted">(Original dimensions + {{ settings.cutting_allowance if settings else '2.0' }}mm cutting allowance)</small>
+    </div>
+
+    {% for board_name, boards in materials.items() %}
+    <div class="card mb-4" data-board-type="{{ board_name }}">
+        <div class="card-header">
+            <h2>{{ board_name }}</h2>
+        </div>
+        <div class="card-body p-0">
+            {% for board in boards %}
+            <div class="board-layout">
+                <div class="board-header d-flex justify-content-between align-items-center flex-wrap">
+                    <h3 class="mb-2 mb-md-0">{{ board_name }} - Board {{ loop.index }}</h3>
+                    <div class="board-info small text-muted">
+                        Total: {{ board.total_length }}mm
+                    </div>
+                </div>
+                <div class="board" data-color="{{ board.pieces[0].color if board.pieces else '' }}">
+                    {% for piece in board.pieces %}
+                        <div class="sill-piece color-{{ piece.color|lower|replace(' ', '-') }}"
+                             style="width: {{ (piece.length / 5000 * 100)|round(2) }}%">
+                            <div class="sill-info">
+                                <div class="sill-length">{{ piece.length }}mm</div>
+                            </div>
+                            <div class="sill-details">
+                                <div class="sill-simple">ID {{ piece.id }} {{ piece.location }} {{ piece.original_length|int }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    {% if board.remaining_length > 0 %}
+                        <div class="waste-piece" style="width: {{ (board.remaining_length / 5000 * 100)|round(2) }}%">
+                            <div class="waste-info">
+                                Waste: {{ board.remaining_length|round|int }}mm
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-bottom: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+    background-color: #ffffff;
+}
+
+.card-header h2 {
+    font-size: 1.2rem;
+    margin: 0;
+    color: #333;
+}
+
+.board-layout {
+    padding: 1rem;
+    padding-bottom: 3.5rem;
+    position: relative;
+}
+
+.board-layout:last-child {
+    padding-bottom: 2rem;
+}
+
+.board {
+    margin-bottom: 35px;
+    height: 60px;
+    display: flex;
+    align-items: stretch;
+    position: relative;
+    margin-top: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: 3px solid #000000;
+}
+
+.sill-piece {
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    margin: 0;
+    border-right: 3px solid #000000;
+    box-shadow: 4px 0 4px -2px rgba(0,0,0,0.3);
+}
+
+.sill-piece:last-of-type {
+    border-right: none;
+    box-shadow: none;
+}
+
+.waste-piece {
+    height: 100%;
+    background: repeating-linear-gradient(
+        45deg,
+        #e9ecef,
+        #e9ecef 10px,
+        #dee2e6 10px,
+        #dee2e6 20px
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left: 3px solid #000000;
+    box-shadow: -4px 0 4px -2px rgba(0,0,0,0.3);
+}
+
+.waste-info {
+    background: rgba(255,255,255,0.9);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.sill-piece:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+}
+
+.sill-info {
+    text-align: center;
+    line-height: 1;
+    padding: 2px 4px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+}
+
+.sill-length {
+    font-size: 1.2rem;
+    font-weight: bold;
+    white-space: nowrap;
+    color: #000;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.9);
+    padding: 2px 8px;
+    border-radius: 3px;
+}
+
+.sill-details {
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 2px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 1;
+    line-height: 1.2;
+}
+
+.sill-simple {
+    font-size: 0.85rem;
+    color: #333;
+    font-weight: 500;
+}
+
+/* Style dla jasnych kolorów */
+.color-white .sill-details,
+.color-cream .sill-details {
+    color: #333;
+    background: inherit;
+}
+
+/* Style dla ciemnych kolorów */
+.color-mahogany .sill-details,
+.color-anthracite-grey .sill-details,
+.color-rosewood .sill-details,
+.color-black-ash .sill-details,
+.color-oak .sill-details {
+    color: #333;
+    background: rgba(255,255,255,0.9);
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Kolory tekstu dla jasnych tła */
+.color-white .sill-details,
+.color-cream .sill-details {
+    color: #333;
+}
+
+/* Kolory tła dla elementów */
+.color-white { 
+    background-color: #cccccc !important;
+}
+.color-cream { 
+    background-color: #FFFDD0 !important;
+    color: #333 !important;
+}
+.color-mahogany {
+    background-color: #800000 !important;
+}
+.color-anthracite-grey { 
+    background-color: #383838 !important;
+}
+.color-rosewood { 
+    background-color: #65000B !important;
+}
+.color-black-ash { 
+    background-color: #000000 !important;
+}
+.color-oak { 
+    background-color: #8B4513 !important;
+}
+
+/* Usuwamy niepotrzebne style */
+.sill-piece::before {
+    display: none;
+}
+
+/* Efekt hover z zachowaniem koloru */
+.sill-piece:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+}
+
+/* Dodatkowy gradient dla lepszej widoczności koloru */
+.sill-piece::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,0,0,0.05));
+    pointer-events: none;
+}
+
+/* Style dla elementów z data-attribute */
+.sill-piece[data-color="Mahogany"],
+.sill-piece[data-color="Mahogony"] {
+    background-color: #800000 !important;
+    color: white !important;
+}
+
+/* Style dla nagłówka */
+.card-header {
+    border-bottom: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+    background-color: #ffffff;
+}
+
+/* Kolory dla card-body */
+[data-board-type*="White"] .card-body {
+    background-color: #cccccc !important;
+}
+[data-board-type*="Cream"] .card-body {
+    background-color: #FFFDD0 !important;
+}
+[data-board-type*="Mahogany"] .card-body {
+    background-color: #800000 !important;
+}
+[data-board-type*="Anthracite Grey"] .card-body {
+    background-color: #383838 !important;
+}
+[data-board-type*="Rosewood"] .card-body {
+    background-color: #65000B !important;
+}
+[data-board-type*="Black Ash"] .card-body {
+    background-color: #000000 !important;
+}
+[data-board-type*="Oak"] .card-body {
+    background-color: #8B4513 !important;
+}
+
+.board-header {
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.board-header h3 {
+    font-size: 1rem;
+    margin: 0;
+    color: #333;
+    display: inline-block;
+    padding: 4px 10px;
+}
+
+/* Style dla jasnych kolorów */
+[data-board-type*="White"] .board-header h3,
+[data-board-type*="Cream"] .board-header h3 {
+    background: inherit;
+}
+
+/* Style dla ciemnych kolorów */
+[data-board-type*="Mahogany"] .board-header h3,
+[data-board-type*="Anthracite Grey"] .board-header h3,
+[data-board-type*="Rosewood"] .board-header h3,
+[data-board-type*="Black Ash"] .board-header h3,
+[data-board-type*="Oak"] .board-header h3 {
+    background: rgba(255,255,255,0.9);
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Usuwamy niepotrzebne style cienia i tła dla sill-details */
+.sill-details {
+    box-shadow: none;
+    border-radius: 0;
+}
+
+/* Dodatkowy cień dla tekstu na ciemnych tłach */
+.color-mahogany .sill-details,
+.color-anthracite-grey .sill-details,
+.color-rosewood .sill-details,
+.color-black-ash .sill-details,
+.color-oak .sill-details {
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Cień dla tekstu na jasnych tłach */
+.color-white .sill-details,
+.color-cream .sill-details {
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.7);
+}
+
+/* Dodajemy efekt głębi dla całej płyty */
+.board-layout {
+    padding: 1rem;
+    padding-bottom: 2rem;
+    position: relative;
+}
+
+.board::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+    pointer-events: none;
+    border: 3px solid rgba(0,0,0,0.2);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Obsługa błędów ładowania obrazów/stylów
+    const boards = document.querySelectorAll('.board');
+    boards.forEach(board => {
+        if (!board.offsetHeight) {
+            console.error('Board height is 0, possible rendering issue');
+        }
+    });
+
+    // Sprawdzanie poprawności wyświetlania wymiarów
+    const sillPieces = document.querySelectorAll('.sill-piece');
+    sillPieces.forEach(piece => {
+        const width = piece.style.width;
+        if (parseFloat(width) > 100) {
+            console.error('Invalid piece width:', width);
+            piece.style.width = '100%';
+        }
+    });
+});
+</script>
+{% endblock %} 

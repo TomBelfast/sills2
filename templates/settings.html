@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Settings</h1>
+    
+    <form id="settingsForm" class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Material Dimensions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="plate_length" class="form-label">GP Board Length (mm)</label>
+                            <input type="number" class="form-control" id="plate_length" name="plate_length" 
+                                   value="{{ settings.plate_length }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="length_95mm" class="form-label">95mm Length (mm)</label>
+                            <input type="number" class="form-control" id="length_95mm" name="length_95mm" 
+                                   value="{{ settings.length_95mm }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="cutting_allowance" class="form-label">Cutting Allowance (mm)</label>
+                            <input type="number" class="form-control" id="cutting_allowance" name="cutting_allowance" 
+                                   value="{{ settings.cutting_allowance }}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Fitting Prices</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="fitting_price_straight" class="form-label">Straight Fitting Price</label>
+                                <input type="number" step="0.01" class="form-control" id="fitting_price_straight" name="fitting_price_straight" 
+                                       value="{{ prices.fitting_price_straight }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="fitting_price_c_shape" class="form-label">C-shaped Sill Fitting</label>
+                                <input type="number" step="0.01" class="form-control" id="fitting_price_c_shape" name="fitting_price_c_shape" value="{{ prices.fitting_price_c_shape }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="fitting_price_bay_curve" class="form-label">Bay-Curve shaped Sill Fitting</label>
+                                <input type="number" step="0.01" class="form-control" id="fitting_price_bay_curve" name="fitting_price_bay_curve" value="{{ prices.fitting_price_bay_curve }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="fitting_price_conservatory" class="form-label">Conservatory Sill Fitting</label>
+                                <input type="number" step="0.01" class="form-control" id="fitting_price_conservatory" name="fitting_price_conservatory" value="{{ prices.fitting_price_conservatory }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="fitting_price_95mm" class="form-label">Additional 95mm Board Fitting</label>
+                                <input type="number" step="0.01" class="form-control" id="fitting_price_95mm" name="fitting_price_95mm" value="{{ prices.fitting_price_95mm }}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Material Usage per Meter</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="hot_glue_per_meter" class="form-label">Hot Glue (sticks/m)</label>
+                            <input type="number" step="0.01" class="form-control" id="hot_glue_per_meter" name="hot_glue_per_meter" 
+                                   value="{{ settings.hot_glue_per_meter }}" required>
+                            <small class="form-text text-muted">Number of glue sticks used per meter</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="glue_with_activator_per_meter" class="form-label">Glue with Activator (l/m)</label>
+                            <input type="number" step="0.01" class="form-control" id="glue_with_activator_per_meter" 
+                                   name="glue_with_activator_per_meter" value="{{ settings.glue_with_activator_per_meter }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="silicone_per_meter" class="form-label">Clear Silicone (l/m)</label>
+                            <input type="number" step="0.01" class="form-control" id="silicone_per_meter" name="silicone_per_meter" 
+                                   value="{{ settings.silicone_per_meter }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="silicone_color_per_meter" class="form-label">Colored Silicone (l/m)</label>
+                            <input type="number" step="0.01" class="form-control" id="silicone_color_per_meter" 
+                                   name="silicone_color_per_meter" value="{{ settings.silicone_color_per_meter }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="pvc_cleaner_per_meter" class="form-label">PVC Cleaner (l/m)</label>
+                            <input type="number" step="0.01" class="form-control" id="pvc_cleaner_per_meter" 
+                                   name="pvc_cleaner_per_meter" value="{{ settings.pvc_cleaner_per_meter }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fixall_per_meter" class="form-label">Fixall White per meter (ml):</label>
+                            <input type="number" step="0.01" class="form-control" id="fixall_per_meter" name="fixall_per_meter" value="{{ settings.fixall_per_meter }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="glue_color_extra" class="form-label">Additional FixAll White for Color (l/m)</label>
+                            <input type="number" step="0.01" class="form-control" id="glue_color_extra" name="glue_color_extra" 
+                                   value="{{ settings.glue_color_extra }}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Material Prices</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="gp_board_price" class="form-label">GP Board Price (per board)</label>
+                                <input type="number" step="0.01" class="form-control" id="gp_board_price" name="gp_board_price" 
+                                       value="{{ prices.gp_board_price }}" required>
+                                <small class="form-text text-muted">Price for one 6m board</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="capit_board_price" class="form-label">Capit Board Price (per board)</label>
+                                <input type="number" step="0.01" class="form-control" id="capit_board_price" name="capit_board_price" 
+                                       value="{{ prices.capit_board_price }}" required>
+                                <small class="form-text text-muted">Price for one 6m board</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="board_95mm_price" class="form-label">95mm Board Price (per board)</label>
+                                <input type="number" step="0.01" class="form-control" id="board_95mm_price" name="board_95mm_price" 
+                                       value="{{ prices.board_95mm_price }}" required>
+                                <small class="form-text text-muted">Price for one 6m board</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="silicone_price" class="form-label">Silicone Price (per tube)</label>
+                                <input type="number" step="0.01" class="form-control" id="silicone_price" name="silicone_price" 
+                                       value="{{ prices.silicone_price }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="s2_clear_silicone_price" class="form-label">S2 Clear Silicone Price (per tube)</label>
+                                <input type="number" step="0.01" class="form-control" id="s2_clear_silicone_price" name="s2_clear_silicone_price" value="{{ prices.s2_clear_silicone_price }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="fixall_white_price" class="form-label">FixAll White Price (per tube)</label>
+                                <input type="number" step="0.01" class="form-control" id="fixall_white_price" name="fixall_white_price" value="{{ prices.fixall_white_price }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="hot_glue_price" class="form-label">Hot Glue Price (per stick)</label>
+                                <input type="number" step="0.01" class="form-control" id="hot_glue_price" name="hot_glue_price" 
+                                       value="{{ prices.hot_glue_price }}" required>
+                                <small class="form-text text-muted">Price for one glue stick</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="glue_with_activator_price" class="form-label">Glue with Activator Price (per pack)</label>
+                                <input type="number" step="0.01" class="form-control" id="glue_with_activator_price" name="glue_with_activator_price" value="{{ prices.glue_with_activator_price }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="pvc_cleaner_price" class="form-label">PVC Cleaner Price (per bottle)</label>
+                                <input type="number" step="0.01" class="form-control" id="pvc_cleaner_price" name="pvc_cleaner_price" value="{{ prices.pvc_cleaner_price }}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+                <button type="button" class="btn btn-secondary" onclick="resetToSavedDefaults()">Reset to Saved Defaults</button>
+                <button type="button" class="btn btn-warning" onclick="resetToBuiltinDefaults()">Reset to Built-in Defaults</button>
+                <button type="button" class="btn btn-success" onclick="saveAsDefault()">Save as Default</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+let isUpdating = false;
+
+document.getElementById('settingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (isUpdating) {
+        console.log('Update already in progress, ignoring...');
+        return;
+    }
+    
+    isUpdating = true;
+    console.log('Starting settings update...');
+    
+    // Disable submit button to prevent double clicks
+    const submitBtn = this.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+    }
+    
+    const formData = new FormData(this);
+    
+    fetch('{{ url_for("update_settings") }}', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        isUpdating = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Save Settings';
+        }
+        
+        if (data.status === 'success') {
+            alert('Settings updated successfully!');
+            // Don't reload the page - let user stay on current form
+            // setTimeout(() => {
+            //     window.location.reload();
+            // }, 1000);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        isUpdating = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Save Settings';
+        }
+        console.error('Error:', error);
+        alert('An error occurred while updating settings');
+    });
+});
+
+function resetToSavedDefaults() {
+    if (confirm('Are you sure you want to reset all settings to your saved default values?')) {
+        window.location.href = "{{ url_for('reset_settings') }}";
+    }
+}
+
+function resetToBuiltinDefaults() {
+    if (confirm('Are you sure you want to reset all settings to built-in default values? This will ignore your saved defaults.')) {
+        window.location.href = "{{ url_for('reset_to_builtin') }}";
+    }
+}
+
+function saveAsDefault() {
+    if (confirm('Are you sure you want to save current settings as default?')) {
+        // Get form data to save current form values
+        const formData = new FormData(document.getElementById('settingsForm'));
+        
+        fetch('{{ url_for("save_as_default") }}', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Current settings saved as default successfully!');
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while saving default settings');
+        });
+    }
+}
+</script>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h3 class="card-title">Current Settings</h3>
+        <table class="table table-striped">
+            <tbody>
+                <tr>
+                    <th>GP Board Length:</th>
+                    <td>{{ settings.plate_length }} mm</td>
+                </tr>
+                <tr>
+                    <th>95mm Length:</th>
+                    <td>{{ settings.length_95mm }} mm</td>
+                </tr>
+                <tr>
+                    <th>Cutting Allowance:</th>
+                    <td>{{ settings.cutting_allowance }} mm</td>
+                </tr>
+                <tr>
+                    <th>Mounting Glue per Meter:</th>
+                    <td>{{ settings.glue_per_meter }} l/m</td>
+                </tr>
+                <tr>
+                    <th>Hot Glue per Meter:</th>
+                    <td>{{ settings.hot_glue_per_meter }} l/m</td>
+                </tr>
+                <tr>
+                    <th>Glue with Activator per Meter:</th>
+                    <td>{{ settings.glue_with_activator_per_meter }} l/m</td>
+                </tr>
+                <tr>
+                    <th>Clear Silicone per Meter:</th>
+                    <td>{{ settings.silicone_per_meter }} l/m</td>
+                </tr>
+                <tr>
+                    <th>Colored Silicone per Meter:</th>
+                    <td>{{ settings.silicone_color_per_meter }} l/m</td>
+                </tr>
+                <tr>
+                    <th>PVC Cleaner per Meter:</th>
+                    <td>{{ settings.pvc_cleaner_per_meter }} l/m</td>
+                </tr>
+                <tr>
+                    <th>Fixall White per Meter:</th>
+                    <td>{{ settings.fixall_per_meter }} ml/m</td>
+                </tr>
+                <tr>
+                    <th>Additional Color Glue:</th>
+                    <td>{{ settings.glue_color_extra }} l/m</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

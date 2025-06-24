@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Clients</h2>
+    
+    {% if active_client %}
+    <div class="alert alert-info">
+        <strong>Active Client:</strong> {{ active_client.first_name }} {{ active_client.last_name }}
+        <br>
+        <small>ID: {{ active_client.id }}</small>
+    </div>
+    {% endif %}
+
+    <!-- Add Client Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            Add New Client
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('add_client') }}">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="first_name" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="last_name" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="mobile" class="form-label">Mobile</label>
+                        <input type="tel" class="form-control" id="mobile" name="mobile">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="address" name="address" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="postal_code" class="form-label">Postal Code</label>
+                        <input type="text" class="form-control" id="postal_code" name="postal_code" required 
+                               pattern="[A-Za-z]{1,2}[0-9][A-Za-z0-9]? [0-9][A-Za-z]{2}" 
+                               placeholder="AA1A 1AA"
+                               title="Please enter a valid postal code (e.g., AA1A 1AA)">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="town" class="form-label">Town</label>
+                        <input type="text" class="form-control" id="town" name="town" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="source" class="form-label">Source</label>
+                        <select class="form-select" id="source" name="source">
+                            <option value="">Select source</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="Google">Google</option>
+                            <option value="Recommendation">Recommendation</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Client</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Clients Table -->
+    <div class="card">
+        <div class="card-header">
+            Clients List
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Contact</th>
+                            <th>Email</th>
+                            <th>Address</th>
+                            <th>Town</th>
+                            <th>Postal Code</th>
+                            <th>Source</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for client in clients %}
+                        <tr {% if active_client and active_client.id == client.id %}class="table-primary"{% endif %}>
+                            <td>{{ client.first_name }}</td>
+                            <td>{{ client.last_name }}</td>
+                            <td>
+                                <strong>P:</strong> {{ client.phone }}<br>
+                                {% if client.mobile %}<strong>M:</strong> {{ client.mobile }}<br>{% endif %}
+                                <a href="https://wa.me/{{ client.phone|replace(' ', '')|replace('-', '')|replace('(', '')|replace(')', '') }}" 
+                                   onclick="this.href='https://wa.me/' + formatUKPhoneForWhatsApp('{{ client.phone }}')"
+                                   target="_blank" 
+                                   class="btn btn-success btn-sm mt-1"
+                                   title="WhatsApp">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                            </td>
+                            <td>{{ client.email }}</td>
+                            <td>{{ client.address }}</td>
+                            <td>{{ client.town }}</td>
+                            <td>{{ client.postal_code }}</td>
+                            <td>{{ client.source }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="https://www.google.com/maps/search/?api=1&query={{ client.address|urlencode }}+{{ client.postal_code|urlencode }}" 
+                                       target="_blank" 
+                                       class="btn btn-primary btn-sm"
+                                       title="Pokaż na mapie">
+                                        <i class="fas fa-map-marker-alt"></i> Mapa
+                                    </a>
+                                    {% if client.email %}
+                                    <a href="mailto:{{ client.email }}" 
+                                       class="btn btn-info btn-sm"
+                                       title="Wyślij email">
+                                        <i class="fas fa-envelope"></i> Email
+                                    </a>
+                                    {% endif %}
+                                    <a href="{{ url_for('set_active_client', client_id=client.id) }}" 
+                                       class="btn btn-success btn-sm {% if active_client and active_client.id == client.id %}active{% endif %}">
+                                        {% if active_client and active_client.id == client.id %}
+                                            Active
+                                        {% else %}
+                                            Set Active
+                                        {% endif %}
+                                    </a>
+                                    <form method="POST" action="{{ url_for('delete_client', client_id=client.id) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm" 
+                                                onclick="return confirm('Are you sure you want to delete this client?')">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if active_client %}
+    <!-- Client Orders -->
+    <div class="card mt-4">
+        <div class="card-header">
+            Orders for {{ active_client.first_name }} {{ active_client.last_name }}
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order Number</th>
+                            <th>Length</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Order Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sill in active_client.sills %}
+                        <tr>
+                            <td>{{ sill.order_number }}</td>
+                            <td>{{ sill.length }}mm</td>
+                            <td>{{ sill.sill_type }}</td>
+                            <td>{{ sill.status }}</td>
+                            <td>{{ sill.order_date.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<!-- Dodaj Font Awesome dla ikony mapy -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+function formatUKPhoneForWhatsApp(phone) {
+    // Usuń wszystkie spacje, myślniki i inne znaki specjalne
+    let cleanPhone = phone.replace(/[^0-9+]/g, '');
+    
+    // Jeśli numer zaczyna się od '0', usuń zero i dodaj '+44'
+    if (cleanPhone.startsWith('0')) {
+        cleanPhone = '+44' + cleanPhone.substring(1);
+    }
+    // Jeśli numer nie zaczyna się od '+', dodaj '+44'
+    else if (!cleanPhone.startsWith('+')) {
+        cleanPhone = '+44' + cleanPhone;
+    }
+    
+    return cleanPhone;
+}
+</script>
+{% endblock %}
+{% endblock %}

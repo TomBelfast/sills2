@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Dane klienta{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <h2>Dodaj nowego klienta</h2>
+        <form id="clientForm" method="POST">
+            <div class="mb-3">
+                <label for="first_name" class="form-label">Imię</label>
+                <input type="text" class="form-control" id="first_name" name="first_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="last_name" class="form-label">Nazwisko</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="address" class="form-label">Adres</label>
+                <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">Telefon</label>
+                <input type="tel" class="form-control" id="phone" name="phone" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Dodaj klienta</button>
+        </form>
+    </div>
+    <div class="col-md-6">
+        <h2>Lista klientów</h2>
+        <div id="clientsList" class="list-group">
+            {% for client in clients %}
+            <div class="list-group-item">
+                <h5 class="mb-1">{{ client.first_name }} {{ client.last_name }}</h5>
+                <p class="mb-1">{{ client.address }}</p>
+                <small>Tel: {{ client.phone }}</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('clientForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    fetch('/client', {
+        method: 'POST',
+        body: new FormData(this)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        this.reset();
+        
+        // Add new client to the list
+        const clientsList = document.getElementById('clientsList');
+        const newClient = data.client;
+        
+        const clientElement = document.createElement('div');
+        clientElement.className = 'list-group-item';
+        clientElement.innerHTML = `
+            <h5 class="mb-1">${newClient.first_name} ${newClient.last_name}</h5>
+            <p class="mb-1">${newClient.address}</p>
+            <small>Tel: ${newClient.phone}</small>
+        `;
+        
+        clientsList.appendChild(clientElement);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Wystąpił błąd podczas dodawania klienta');
+    });
+});
+</script>
+{% endblock %}

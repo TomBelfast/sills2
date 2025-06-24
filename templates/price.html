@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Price Calculation{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% if client %}
+        <h1>Price Calculation for {{ client.first_name }} {{ client.last_name }}</h1>
+    {% else %}
+        <div class="alert alert-warning">
+            Please select a client first.
+        </div>
+    {% endif %}
+
+    <div class="table-responsive mb-4">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Location</th>
+                    <th>Type</th>
+                    <th>Color</th>
+                    <th>Length</th>
+                    <th>Material Cost</th>
+                    <th>Fitting Cost</th>
+                    <th>Total Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sills %}
+                <tr>
+                    <td>{{ item.sill.id }}</td>
+                    <td>{{ item.sill.location }}</td>
+                    <td>{{ item.sill.sill_type }}</td>
+                    <td>{{ item.sill.color }}</td>
+                    <td>{{ item.sill.length }}mm</td>
+                    <td>£{{ "%.2f"|format(item.material_cost) }}</td>
+                    <td>£{{ "%.2f"|format(item.fitting_cost) }}</td>
+                    <td>£{{ "%.2f"|format(item.total_cost) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Cost Summary -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Cost Summary</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <tr>
+                    <th>Total Material Cost:</th>
+                    <td class="text-end">£{{ "%.2f"|format(total_material_cost) }}</td>
+                </tr>
+                <tr>
+                    <th>Total Fitting Cost:</th>
+                    <td class="text-end">£{{ "%.2f"|format(total_fitting_cost) }}</td>
+                </tr>
+                <tr class="table-primary">
+                    <th>Total Cost:</th>
+                    <td class="text-end"><strong>£{{ "%.2f"|format(total_cost) }}</strong></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

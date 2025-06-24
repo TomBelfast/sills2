@@ -1,0 +1,215 @@
+# Instructions
+
+During your interaction with the user, if you find anything reusable in this project (e.g. version of a library, model name), especially about a fix to a mistake you made or a correction you received, you should take note in the `Lessons` section in the `.cursorrules` file so you will not make the same mistake again. 
+
+You should also use the `.cursorrules` file as a Scratchpad to organize your thoughts. Especially when you receive a new task, you should first review the content of the Scratchpad, clear old different task if necessary, first explain the task, and plan the steps you need to take to complete the task. You can use todo markers to indicate the progress, e.g.
+[X] Task 1
+[ ] Task 2
+
+Also update the progress of the task in the Scratchpad when you finish a subtask.
+Especially when you finished a milestone, it will help to improve your depth of task accomplishment to use the Scratchpad to reflect and plan.
+The goal is to help you maintain a big picture as well as the progress of the task. Always refer to the Scratchpad when you plan the next step.
+
+# Tools
+
+Note all the tools are in python. So in the case you need to do batch processing, you can always consult the python files and write your own script.
+
+## Screenshot Verification
+
+The screenshot verification workflow allows you to capture screenshots of web pages and verify their appearance using LLMs. The following tools are available:
+
+1. Screenshot Capture:
+```bash
+venv/bin/python tools/screenshot_utils.py URL [--output OUTPUT] [--width WIDTH] [--height HEIGHT]
+```
+
+2. LLM Verification with Images:
+```bash
+venv/bin/python tools/llm_api.py --prompt "Your verification question" --provider {openai|anthropic} --image path/to/screenshot.png
+```
+
+Example workflow:
+```python
+from screenshot_utils import take_screenshot_sync
+from llm_api import query_llm
+
+# Take a screenshot
+screenshot_path = take_screenshot_sync('https://example.com', 'screenshot.png')
+
+# Verify with LLM
+response = query_llm(
+    "What is the background color and title of this webpage?",
+    provider="openai",  # or "anthropic"
+    image_path=screenshot_path
+)
+print(response)
+```
+
+## LLM
+
+You always have an LLM at your side to help you with the task. For simple tasks, you could invoke the LLM by running the following command:
+```
+venv/bin/python ./tools/llm_api.py --prompt "What is the capital of France?" --provider "anthropic"
+```
+
+The LLM API supports multiple providers:
+- OpenAI (default, model: gpt-4o)
+- Azure OpenAI (model: configured via AZURE_OPENAI_MODEL_DEPLOYMENT in .env file, defaults to gpt-4o-ms)
+- DeepSeek (model: deepseek-chat)
+- Anthropic (model: claude-3-sonnet-20240229)
+- Gemini (model: gemini-pro)
+- Local LLM (model: Qwen/Qwen2.5-32B-Instruct-AWQ)
+
+But usually it's a better idea to check the content of the file and use the APIs in the `tools/llm_api.py` file to invoke the LLM if needed.
+
+## Web browser
+
+You could use the `tools/web_scraper.py` file to scrape the web.
+```
+venv/bin/python ./tools/web_scraper.py --max-concurrent 3 URL1 URL2 URL3
+```
+This will output the content of the web pages.
+
+## Search engine
+
+You could use the `tools/search_engine.py` file to search the web.
+```
+venv/bin/python ./tools/search_engine.py "your search keywords"
+```
+This will output the search results in the following format:
+```
+URL: https://example.com
+Title: This is the title of the search result
+Snippet: This is a snippet of the search result
+```
+If needed, you can further use the `web_scraper.py` file to scrape the web page content.
+
+# Lessons
+
+## User Specified Lessons
+
+- Use Python virtual environment in ./venv
+- Add debug information to application logs
+- Read file contents before attempting to edit
+- For multiline git commits, first save message to file
+- Never modify .env.local without user permission
+- Use English language consistently throughout the application
+- Automatically install all components without asking for permission
+- Keep all text content in Polish language for user interface
+- Use proper error handling for database operations
+- Follow proper security practices for file uploads
+- Use proper type hints in Python code
+- Follow Flask best practices for route organization
+
+## Cursor learned
+
+- For search queries, ensure proper character encoding (UTF-8)
+- Add debug information to stderr, keeping stdout clean
+- In SQLite use `sqlite_version()` instead of `VERSION()`
+- When migrating from MySQL to SQLite:
+  - Ensure all SQL queries are SQLite compatible
+  - Drop old tables before creating new ones (`db.drop_all()`)
+  - Use default values in SQLAlchemy models
+  - Perform rollback on transaction errors
+- Flask-Bootstrap requires `flask-bootstrap` package instead of `flask_bootstrap_components`
+- For database initialization:
+  - First drop all tables
+  - Then create new tables
+  - Finally add default values
+  - Always use transactions with error handling
+- For OpenAI Vision API:
+  - Use model `gpt-4o` - model `gpt-4-vision-preview` has been deprecated
+  - Check current API documentation for latest model versions
+  - Ensure account has access to selected model before using it
+- For application localization:
+  - Keep all text content in Polish for user interface
+  - Keep all code comments and logs in English
+  - Ensure consistent terminology across all files
+  - Update API prompts and responses to use Polish
+- For file uploads:
+  - Use secure_filename for all uploaded files
+  - Validate file types before saving
+  - Store files in a secure location
+  - Clean up temporary files
+- For database migrations:
+  - Use Alembic for all database changes
+  - Create meaningful migration messages
+  - Test migrations before applying
+  - Have rollback plan for each migration
+- For testing:
+  - Use pytest for all tests
+  - Create separate test database
+  - Mock external services
+  - Clean up test data after tests
+- For error handling:
+  - Use specific exception types
+  - Log all errors with context
+  - Return user-friendly error messages
+  - Implement proper status codes
+
+# Scratchpad
+
+## Stan projektu - System zarządzania parapetami (2024-03-21)
+
+### Wykonane kroki:
+[X] Utworzono podstawową strukturę projektu
+[X] Zaimplementowano modele bazy danych
+[X] Dodano system migracji bazy danych
+[X] Utworzono podstawowe widoki
+[X] Dodano obsługę przesyłania plików
+[X] Dodano system testów
+[X] Dodano dokumentację
+
+### Następne kroki:
+[ ] Dodać system OCR do analizy kontraktów
+[ ] Zoptymalizować zapytania do bazy danych
+[ ] Dodać system raportowania
+[ ] Dodać system powiadomień
+[ ] Dodać system backupów
+
+### Struktura projektu:
+```
+sills/
+├── app.py                 # Główny plik aplikacji
+├── config.py             # Konfiguracja
+├── extensions.py         # Rozszerzenia Flask
+├── models.py             # Modele bazy danych
+├── routes.py             # Trasy aplikacji
+├── utils.py             # Funkcje pomocnicze
+├── migrations/          # Migracje bazy danych
+├── static/             # Pliki statyczne
+├── templates/          # Szablony HTML
+├── tests/             # Testy
+└── uploads/           # Przesłane pliki
+```
+
+### Technologie:
+- Flask 2.3.3
+- SQLAlchemy 2.0.36
+- Flask-Migrate 4.0.7
+- Flask-Bootstrap 2.3.0
+- Flask-WTF 1.1.1
+- pytest 8.0.0
+
+### Funkcjonalności:
+1. Zarządzanie klientami
+2. Zarządzanie zamówieniami
+3. Kalkulacja materiałów
+4. Kalkulacja kosztów
+5. Analiza kontraktów
+6. Generowanie raportów
+
+### Bezpieczeństwo:
+1. Walidacja danych wejściowych
+2. Sanityzacja danych wyjściowych
+3. Bezpieczne przesyłanie plików
+4. Rate limiting
+5. Logowanie błędów
+
+### API:
+1. /clients - zarządzanie klientami
+2. /sills - zarządzanie parapetami
+3. /materials - kalkulacja materiałów
+4. /price - kalkulacja cen
+5. /settings - ustawienia systemu
+6. /upload_contract - przesyłanie kontraktów

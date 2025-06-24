@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% block title %}Window Sills Management{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Window Sills Management</h1>
+    
+    <!-- Add new sill form -->
+    <div class="row">
+        <div class="col-12 col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h4>Add New Window Sill</h4>
+                </div>
+                <div class="card-body">
+                    <form id="sillForm" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="client" class="form-label">Client ID</label>
+                            <select class="form-control" id="client" name="client_id" required>
+                                {% if active_client %}
+                                    <option value="{{ active_client.id }}" selected>
+                                        {{ active_client.first_name }} {{ active_client.last_name }} (ID: {{ active_client.id }})
+                                    </option>
+                                {% else %}
+                                    <option value="">Select client</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="length" class="form-label">Length (mm)</label>
+                            <input type="number" 
+                                   step="1" 
+                                   min="1" 
+                                   max="4900"
+                                   class="form-control" 
+                                   id="length" 
+                                   name="length" 
+                                   required>
+                            <div class="invalid-feedback">
+                                Please enter a valid length between 1 and 4900mm (Cutting Allowance will be added automatically)
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="depth" class="form-label">Depth (mm)</label>
+                            <input type="number" step="1" min="1" class="form-control" id="depth" name="depth" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="color" class="form-label">Color</label>
+                            <select class="form-select" id="color" name="color" required>
+                                <option value="">Select color</option>
+                                {% for color in colors %}
+                                <option value="{{ color }}" {% if session.get('last_color') == color %}selected{% endif %}>{{ color }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sill_type" class="form-label">Sill Type</label>
+                            <select class="form-select" id="sill_type" name="sill_type" required>
+                                <option value="">Select type</option>
+                                {% for type in sill_types %}
+                                <option value="{{ type }}" {% if session.get('last_sill_type') == type %}selected{% endif %}>{{ type }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" name="location" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="has_95mm" name="has_95mm">
+                            <label class="form-check-label" for="has_95mm">Has 95mm</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Window Sill</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Window Sills List -->
+        <div class="col-12 col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Window Sills List</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Client ID</th>
+                                    <th>Length</th>
+                                    <th>Depth</th>
+                                    <th>Color</th>
+                                    <th>Type</th>
+                                    <th>Location</th>
+                                    <th>Has 95mm</th>
+                                    <th>Order Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sill in sills %}
+                                <tr>
+                                    <td>{{ sill.id }}</td>
+                                    <td>{{ sill.client.first_name }} {{ sill.client.last_name }}</td>
+                                    <td>{{ sill.length }}</td>
+                                    <td>{{ sill.depth }}</td>
+                                    <td>{{ sill.color }}</td>
+                                    <td>{{ sill.sill_type }}</td>
+                                    <td>{{ sill.location }}</td>
+                                    <td>{{ "Yes" if sill.has_95mm else "No" }}</td>
+                                    <td>{{ sill.order_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" onclick="editSill({{ sill.id }}, '{{ sill.client_id }}', {{ sill.length }}, {{ sill.depth }}, '{{ sill.color }}', '{{ sill.sill_type }}', '{{ sill.location }}', {{ 'true' if sill.has_95mm else 'false' }})">
+                                            Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteSill({{ sill.id }})">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Window Sill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="edit_sill_id" name="sill_id">
+                    <div class="mb-3">
+                        <label for="edit_client" class="form-label">Client ID</label>
+                        <select class="form-select" id="edit_client" name="client_id" required>
+                            {% for client in clients %}
+                            <option value="{{ client.id }}">{{ client.first_name }} {{ client.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_length" class="form-label">Length (mm)</label>
+                        <input type="number" step="1" class="form-control" id="edit_length" name="length" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_depth" class="form-label">Depth (mm)</label>
+                        <input type="number" step="1" class="form-control" id="edit_depth" name="depth" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_color" class="form-label">Color</label>
+                        <select class="form-select" id="edit_color" name="color" required>
+                            {% for color in colors %}
+                            <option value="{{ color }}">{{ color }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_sill_type" class="form-label">Sill Type</label>
+                        <select class="form-select" id="edit_sill_type" name="sill_type" required>
+                            {% for type in sill_types %}
+                            <option value="{{ type }}">{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="edit_location" name="location" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="edit_has_95mm" name="has_95mm">
+                        <label class="form-check-label" for="edit_has_95mm">Has 95mm</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveSillChanges()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/sills.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Walidacja formularza
+    const form = document.getElementById('sillForm');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,530 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row">
+        <!-- Lewa kolumna - podgląd zdjęcia -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="text-center">Contract Image</h2>
+                </div>
+                <div class="card-body">
+                    <div class="position-relative">
+                        <img src="{{ url_for('static', filename='uploads/preview.jpg') }}?t={{ range(1000000) | random }}" 
+                             class="img-fluid" 
+                             alt="Contract preview"
+                             id="contractImage"
+                             style="cursor: zoom-in;">
+                    </div>
+                    <!-- Modal do powiększenia zdjęcia -->
+                    <div class="modal fade" id="imageModal" tabindex="-1">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Contract Image</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" title="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <img src="{{ url_for('static', filename='uploads/preview.jpg') }}?t={{ range(1000000) | random }}" 
+                                         class="img-fluid" 
+                                         alt="Contract preview">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rozpoznany tekst -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Recognized Text</h2>
+                </div>
+                <div class="card-body">
+                    <pre class="bg-light p-3" style="white-space: pre-wrap;">{{ extracted_text }}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prawa kolumna - formularz weryfikacji -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Contract Data Verification</h2>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('save_contract') }}" class="needs-validation" novalidate>
+                        <!-- Dane klienta -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h3 class="mb-0">Client Details</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="first_name" class="form-label">First Name</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="first_name" 
+                                               name="first_name"
+                                               value="{{ client_data.first_name }}"
+                                               required>
+                                        <div class="invalid-feedback">
+                                            First name is required
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="last_name" class="form-label">Last Name</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="last_name" 
+                                               name="last_name"
+                                               value="{{ client_data.last_name }}"
+                                               required>
+                                        <div class="invalid-feedback">
+                                            Last name is required
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="phone" class="form-label">Phone</label>
+                                        <input type="tel" 
+                                               class="form-control {% if client_data.phone == '00000000000' %}border-warning{% endif %}" 
+                                               id="phone" 
+                                               name="phone"
+                                               value="{{ client_data.phone }}"
+                                               required
+                                               pattern="^\+?[\d\s-]{10,}$">
+                                        {% if client_data.phone == '00000000000' %}
+                                        <div class="text-warning small">
+                                            ⚠️ OCR couldn't read phone number clearly. Please correct this placeholder.
+                                        </div>
+                                        {% endif %}
+                                        <div class="invalid-feedback">
+                                            Please enter a valid phone number
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="mobile" class="form-label">Mobile</label>
+                                        <input type="tel" 
+                                               class="form-control" 
+                                               id="mobile" 
+                                               name="mobile"
+                                               value="{{ client_data.mobile }}"
+                                               pattern="^\+?[\d\s-]{10,}$">
+                                        <div class="invalid-feedback">
+                                            Please enter a valid mobile number
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" 
+                                               class="form-control" 
+                                               id="email" 
+                                               name="email"
+                                               value="{{ client_data.email }}">
+                                        <div class="invalid-feedback">
+                                            Please enter a valid email address
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label for="address" class="form-label">Address</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="address" 
+                                               name="address"
+                                               value="{{ client_data.address }}"
+                                               required>
+                                        <div class="invalid-feedback">
+                                            Address is required
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="town" class="form-label">Town</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="town" 
+                                               name="town"
+                                               value="{{ client_data.town }}"
+                                               required>
+                                        <div class="invalid-feedback">
+                                            Town is required
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="postal_code" class="form-label">Post Code</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="postal_code" 
+                                               name="postal_code"
+                                               value="{{ client_data.postal_code }}"
+                                               required
+                                               pattern="^[A-Za-z]{1,2}[0-9][A-Za-z0-9]? [0-9][A-Za-z]{2}$">
+                                        <div class="invalid-feedback">
+                                            Please enter a valid UK post code
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="source" class="form-label">Source</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="source" 
+                                           name="source"
+                                           value="{{ client_data.source }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dane parapetów -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h3 class="mb-0">Window Sills ({{ sills_data|length }} found)</h3>
+                            </div>
+                            <div class="card-body">
+                                <!-- Debug info -->
+                                <div class="alert alert-info mb-3">
+                                    <small><strong>Debug:</strong> Found {{ sills_data|length }} window sills</small>
+                                </div>
+                                <input type="hidden" name="sill_count" value="{{ sills_data|length }}">
+                                
+                                {% for sill in sills_data %}
+                                <div class="card mb-3" id="sill_{{ loop.index0 }}">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span>Window Sill #{{ loop.index }} - {{ sill.location }}</span>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeSill({{ loop.index0 }})">
+                                            Remove
+                                        </button>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="sill_{{ loop.index0 }}_location" class="form-label">Location</label>
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       id="sill_{{ loop.index0 }}_location" 
+                                                       name="sill_{{ loop.index0 }}_location"
+                                                       value="{{ sill.location }}"
+                                                       required>
+                                                <div class="invalid-feedback">
+                                                    Location is required
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="sill_{{ loop.index0 }}_type" class="form-label">Type</label>
+                                                <select class="form-select" 
+                                                        id="sill_{{ loop.index0 }}_type" 
+                                                        name="sill_{{ loop.index0 }}_type"
+                                                        required>
+                                                    {% for type in ['Straight', 'C-shaped', 'Bay-Curve shaped', 'Conservatory'] %}
+                                                    <option value="{{ type }}" {% if type == sill.type %}selected{% endif %}>
+                                                        {{ type }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                                <div class="invalid-feedback">
+                                                    Please select a type
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label for="sill_{{ loop.index0 }}_length" class="form-label">Length (mm)</label>
+                                                <input type="number" 
+                                                       class="form-control" 
+                                                       id="sill_{{ loop.index0 }}_length" 
+                                                       name="sill_{{ loop.index0 }}_length"
+                                                       value="{{ sill.size }}"
+                                                       required
+                                                       min="1">
+                                                <div class="invalid-feedback">
+                                                    Please enter a valid length
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label for="sill_{{ loop.index0 }}_depth" class="form-label">Depth (mm)</label>
+                                                <input type="number" 
+                                                       class="form-control" 
+                                                       id="sill_{{ loop.index0 }}_depth" 
+                                                       name="sill_{{ loop.index0 }}_depth"
+                                                       value="200"
+                                                       required
+                                                       min="1">
+                                                <div class="invalid-feedback">
+                                                    Please enter a valid depth
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="sill_{{ loop.index0 }}_color" class="form-label">Color</label>
+                                                <select class="form-select" 
+                                                        id="sill_{{ loop.index0 }}_color" 
+                                                        name="sill_{{ loop.index0 }}_color"
+                                                        required>
+                                                    {% set available_colors = ['White', 'Cream', 'Anthracite Grey', 'Mahogony', 'Rosewood', 'Black Ash', 'Oak', 'Black Grain'] %}
+                                                    
+                                                    <!-- Add parsed color if not in standard list -->
+                                                    {% if sill.color and sill.color not in available_colors %}
+                                                    <option value="{{ sill.color }}" selected>
+                                                        {{ sill.color }} (detected)
+                                                    </option>
+                                                    {% endif %}
+                                                    
+                                                    {% for color in available_colors %}
+                                                    <option value="{{ color }}" {% if color == sill.color %}selected{% endif %}>
+                                                        {{ color }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                                <div class="invalid-feedback">
+                                                    Please select a color
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <div class="form-check mt-4">
+                                                    <input type="checkbox" 
+                                                           class="form-check-input" 
+                                                           id="sill_{{ loop.index0 }}_has_95mm" 
+                                                           name="sill_{{ loop.index0 }}_has_95mm"
+                                                           {% if sill.has_95mm %}checked{% endif %}>
+                                                    <label class="form-check-label" for="sill_{{ loop.index0 }}_has_95mm">
+                                                        Additional 95mm Side
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                
+                                <!-- Add new sill button -->
+                                <div class="text-center mt-3">
+                                    <button type="button" class="btn btn-outline-primary" onclick="addNewSill()">
+                                        Add New Window Sill
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                Save Contract
+                            </button>
+                            <a href="{{ url_for('upload_contract') }}" class="btn btn-secondary">
+                                Back
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Obsługa powiększania zdjęcia
+document.getElementById('contractImage').addEventListener('click', function() {
+    var modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    modal.show();
+});
+
+// Walidacja formularza po stronie klienta
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+
+// Funkcja do usuwania parapetu
+function removeSill(index) {
+    if (confirm('Are you sure you want to remove this window sill?')) {
+        document.getElementById('sill_' + index).remove();
+        updateSillCount();
+        renumberSills();
+    }
+}
+
+// Funkcja do dodawania nowego parapetu
+function addNewSill() {
+    const sillsContainer = document.querySelector('.card-body');
+    const addButton = document.querySelector('.text-center.mt-3');
+    const currentCount = document.querySelectorAll('[id^="sill_"]').length;
+    
+    const newSillHtml = `
+        <div class="card mb-3" id="sill_${currentCount}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Window Sill #${currentCount + 1} - New Sill</span>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeSill(${currentCount})">
+                    Remove
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="sill_${currentCount}_location" class="form-label">Location</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="sill_${currentCount}_location" 
+                               name="sill_${currentCount}_location"
+                               value=""
+                               required>
+                        <div class="invalid-feedback">
+                            Location is required
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="sill_${currentCount}_type" class="form-label">Type</label>
+                        <select class="form-select" 
+                                id="sill_${currentCount}_type" 
+                                name="sill_${currentCount}_type"
+                                required>
+                            <option value="Straight">Straight</option>
+                            <option value="C-shaped">C-shaped</option>
+                            <option value="Bay-Curve shaped">Bay-Curve shaped</option>
+                            <option value="Conservatory">Conservatory</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a type
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="sill_${currentCount}_length" class="form-label">Length (mm)</label>
+                        <input type="number" 
+                               class="form-control" 
+                               id="sill_${currentCount}_length" 
+                               name="sill_${currentCount}_length"
+                               value=""
+                               required
+                               min="1">
+                        <div class="invalid-feedback">
+                            Please enter a valid length
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="sill_${currentCount}_depth" class="form-label">Depth (mm)</label>
+                        <input type="number" 
+                               class="form-control" 
+                               id="sill_${currentCount}_depth" 
+                               name="sill_${currentCount}_depth"
+                               value="200"
+                               required
+                               min="1">
+                        <div class="invalid-feedback">
+                            Please enter a valid depth
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="sill_${currentCount}_color" class="form-label">Color</label>
+                        <select class="form-select" 
+                                id="sill_${currentCount}_color" 
+                                name="sill_${currentCount}_color"
+                                required>
+                            <option value="White">White</option>
+                            <option value="Cream">Cream</option>
+                            <option value="Anthracite Grey">Anthracite Grey</option>
+                            <option value="Mahogony">Mahogony</option>
+                            <option value="Rosewood">Rosewood</option>
+                            <option value="Black Ash">Black Ash</option>
+                            <option value="Oak">Oak</option>
+                            <option value="Black Grain">Black Grain</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a color
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check mt-4">
+                            <input type="checkbox" 
+                                   class="form-check-input" 
+                                   id="sill_${currentCount}_has_95mm" 
+                                   name="sill_${currentCount}_has_95mm">
+                            <label class="form-check-label" for="sill_${currentCount}_has_95mm">
+                                Additional 95mm Side
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    addButton.insertAdjacentHTML('beforebegin', newSillHtml);
+    updateSillCount();
+}
+
+// Funkcja do aktualizacji liczby parapetów
+function updateSillCount() {
+    const count = document.querySelectorAll('[id^="sill_"]').length;
+    document.querySelector('input[name="sill_count"]').value = count;
+    
+    // Update header
+    const header = document.querySelector('.card-header h3');
+    header.textContent = `Window Sills (${count} found)`;
+}
+
+// Funkcja do przenumerowania parapetów
+function renumberSills() {
+    const sills = document.querySelectorAll('[id^="sill_"]');
+    sills.forEach((sill, index) => {
+        // Update ID
+        sill.id = `sill_${index}`;
+        
+        // Update header text
+        const headerSpan = sill.querySelector('.card-header span');
+        const locationInput = sill.querySelector('[name$="_location"]');
+        const location = locationInput ? locationInput.value || 'New Sill' : 'New Sill';
+        headerSpan.textContent = `Window Sill #${index + 1} - ${location}`;
+        
+        // Update all input names and IDs
+        const inputs = sill.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            const oldName = input.name;
+            if (oldName.includes('sill_')) {
+                const suffix = oldName.split('_').slice(2).join('_');
+                input.name = `sill_${index}_${suffix}`;
+                input.id = `sill_${index}_${suffix}`;
+                
+                // Update label
+                const label = sill.querySelector(`label[for="${input.id}"]`);
+                if (label) {
+                    label.setAttribute('for', input.id);
+                }
+            }
+        });
+        
+        // Update remove button
+        const removeButton = sill.querySelector('.btn-danger');
+        removeButton.setAttribute('onclick', `removeSill(${index})`);
+    });
+}
+</script>
+{% endblock %} 

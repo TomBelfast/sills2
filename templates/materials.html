@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Materials List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Materials for client: {{ client.first_name }} {{ client.last_name }}</h1>
+
+    {% if materials.boards %}
+        <h2>Boards</h2>
+        <ul class="list-group mb-4">
+            {% for board in materials.boards %}
+                <li class="list-group-item">
+                    {{ board.name }} - {{ board.amount }} {{ board.unit }} {{ "%.2f"|format(board.total_length) }}m
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if materials.glues %}
+        <h2>Adhesives</h2>
+        <ul class="list-group mb-4">
+            {% for glue in materials.glues %}
+                <li class="list-group-item">
+                    {{ glue.name }} - {{ "%.2f"|format(glue.amount) }} {{ glue.unit }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if materials.silicones %}
+        <h2>Silicones</h2>
+        <ul class="list-group mb-4">
+            {% for silicone in materials.silicones %}
+                <li class="list-group-item">
+                    {{ silicone.name }} - {{ "%.2f"|format(silicone.amount) }} {{ silicone.unit }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if materials.other %}
+        <h2>Other Materials</h2>
+        <ul class="list-group mb-4">
+            {% for item in materials.other %}
+                <li class="list-group-item">
+                    {{ item.name }} - {{ "%.2f"|format(item.amount) }} {{ item.unit }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if not materials.boards and not materials.glues and not materials.silicones and not materials.other %}
+        <div class="alert alert-info">
+            No materials to display.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
