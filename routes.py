@@ -4,6 +4,7 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy import desc, asc
 from extensions import db, limiter
 from models import Client, Sill, Settings, MaterialPrices, DefaultSettings
 from utils import (
@@ -30,7 +31,7 @@ def register_routes(app):
                 db.session.execute(db.text("SELECT 1"))
                 logger.info("Database connection OK")
                 
-                clients = Client.query.order_by(Client.created_at.desc()).paginate(page=page, per_page=per_page)
+                clients = Client.query.order_by(Client.id.desc()).paginate(page=page, per_page=per_page)
                 logger.info(f"Found {clients.total if clients else 0} clients")
                 
                 return render_template('index.html', clients=clients.items, pagination=clients)
@@ -55,7 +56,7 @@ def register_routes(app):
             active_client_id = session.get('active_client_id')
             active_client = Client.query.get(active_client_id) if active_client_id else None
             
-            clients = Client.query.order_by(Client.last_name.asc(), Client.first_name.asc()).all()
+            clients = Client.query.order_by(asc(Client.last_name), asc(Client.first_name)).all()
             return render_template('clients.html', 
                                 clients=clients, 
                                 active_client=active_client)
@@ -74,29 +75,43 @@ def register_routes(app):
             if request.method == 'POST':
                 try:
                     client_id = request.form.get('client_id')
-                    length = float(request.form.get('length'))
-                    depth = float(request.form.get('depth'))
+                    length_str = request.form.get('length')
+                    depth_str = request.form.get('depth')
+                    high_str = request.form.get('high')
+                    angle_str = request.form.get('angle')
+                    
+                    if not length_str or not depth_str:
+                        raise ValueError("Length and depth are required")
+                    
+                    length = float(length_str)
+                    depth = float(depth_str)
+                    high = float(high_str) if high_str and high_str.strip() else None
+                    angle = float(angle_str) if angle_str and angle_str.strip() else None
                     color = request.form.get('color')
                     sill_type = request.form.get('sill_type')
                     location = request.form.get('location')
                     has_95mm = 'has_95mm' in request.form
 
-                    if not all([client_id, length, depth, color, sill_type, location]):
+                    if not all([client_id, color, sill_type, location]):
                         if request.is_json or request.headers.get('Content-Type') == 'application/x-www-form-urlencoded':
                             return jsonify({'status': 'error', 'message': 'All fields are required!'})
                         flash('All fields are required!', 'error')
                         return redirect(url_for('sills'))
 
-                    new_sill = Sill(
-                        client_id=client_id,
-                        order_number=Sill.generate_order_number(),
-                        length=length,
-                        depth=depth,
-                        color=color,
-                        sill_type=sill_type,
-                        location=location,
-                        has_95mm=has_95mm
-                    )
+                    if not client_id:
+                        raise ValueError("Client ID is required")
+
+                    new_sill = Sill()
+                    new_sill.client_id = int(client_id)
+                    new_sill.order_number = Sill.generate_order_number()
+                    new_sill.length = length
+                    new_sill.depth = depth
+                    new_sill.high = high
+                    new_sill.angle = angle
+                    new_sill.color = color or ""
+                    new_sill.sill_type = sill_type or ""
+                    new_sill.location = location or ""
+                    new_sill.has_95mm = has_95mm
                     
                     db.session.add(new_sill)
                     db.session.commit()
@@ -123,7 +138,7 @@ def register_routes(app):
                 return redirect(url_for('clients'))
             
             sills = Sill.query.filter_by(client_id=active_client_id).all()
-            clients = Client.query.order_by(Client.last_name.asc(), Client.first_name.asc()).all()
+            clients = Client.query.order_by(asc(Client.last_name), asc(Client.first_name)).all()
             
             return render_template('sills.html', 
                                 sills=sills, 
@@ -293,18 +308,17 @@ def register_routes(app):
             if default_settings:
                 logger.info(f"Using saved default settings with cutting_allowance: {default_settings.cutting_allowance}")
                 # Use saved default settings
-                new_settings = Settings(
-                    plate_length=default_settings.plate_length,
-                    length_95mm=default_settings.length_95mm,
-                    cutting_allowance=default_settings.cutting_allowance,
-                    hot_glue_per_meter=default_settings.hot_glue_per_meter,
-                    glue_with_activator_per_meter=default_settings.glue_with_activator_per_meter,
-                    silicone_per_meter=default_settings.silicone_per_meter,
-                    silicone_color_per_meter=default_settings.silicone_color_per_meter,
-                    pvc_cleaner_per_meter=default_settings.pvc_cleaner_per_meter,
-                    fixall_per_meter=default_settings.fixall_per_meter,
-                    glue_color_extra=default_settings.glue_color_extra
-                )
+                new_settings = Settings()
+                new_settings.plate_length = default_settings.plate_length
+                new_settings.length_95mm = default_settings.length_95mm
+                new_settings.cutting_allowance = default_settings.cutting_allowance
+                new_settings.hot_glue_per_meter = default_settings.hot_glue_per_meter
+                new_settings.glue_with_activator_per_meter = default_settings.glue_with_activator_per_meter
+                new_settings.silicone_per_meter = default_settings.silicone_per_meter
+                new_settings.silicone_color_per_meter = default_settings.silicone_color_per_meter
+                new_settings.pvc_cleaner_per_meter = default_settings.pvc_cleaner_per_meter
+                new_settings.fixall_per_meter = default_settings.fixall_per_meter
+                new_settings.glue_color_extra = default_settings.glue_color_extra
             else:
                 logger.info("No saved defaults found, using built-in defaults")
                 # Use built-in default settings
@@ -495,33 +509,36 @@ def register_routes(app):
         try:
             sill = Sill.query.get_or_404(sill_id)
             
-            # Get form data
-            client_id = request.form.get('client_id')
-            length = float(request.form.get('length'))
-            depth = float(request.form.get('depth'))
-            color = request.form.get('color')
-            sill_type = request.form.get('sill_type')
-            location = request.form.get('location')
-            has_95mm = 'has_95mm' in request.form
-
-            if not all([client_id, length, depth, color, sill_type, location]):
-                return jsonify({'status': 'error', 'message': 'All fields are required!'})
-
-            # Update sill
-            sill.client_id = client_id
-            sill.length = length
-            sill.depth = depth
-            sill.color = color
-            sill.sill_type = sill_type
-            sill.location = location
-            sill.has_95mm = has_95mm
+            length_str = request.form.get('length')
+            depth_str = request.form.get('depth')
+            high_str = request.form.get('high')
+            angle_str = request.form.get('angle')
+            
+            if not length_str or not depth_str:
+                raise ValueError("Length and depth are required")
+            
+            sill.length = float(length_str)
+            sill.depth = float(depth_str)
+            sill.high = float(high_str) if high_str and high_str.strip() else None
+            sill.angle = float(angle_str) if angle_str and angle_str.strip() else None
+            sill.color = request.form.get('color') or ""
+            sill.sill_type = request.form.get('sill_type') or ""
+            sill.location = request.form.get('location') or ""
+            sill.has_95mm = 'has_95mm' in request.form
             
             db.session.commit()
-            return jsonify({'status': 'success', 'message': 'Window sill updated successfully!'})
             
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'status': 'success', 'message': 'Window sill updated successfully!'})
+            
+            flash('Window sill updated successfully!', 'success')
+            return redirect(url_for('sills'))
         except Exception as e:
             db.session.rollback()
-            return jsonify({'status': 'error', 'message': f'Error updating window sill: {str(e)}'})
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'status': 'error', 'message': f'Error updating window sill: {str(e)}'})
+            flash(f'Error updating window sill: {str(e)}', 'error')
+            return redirect(url_for('sills'))
 
     @app.route('/sills/<int:sill_id>', methods=['DELETE'])
     @limiter.limit("20/minute")
@@ -622,7 +639,7 @@ def register_routes(app):
                     flash('No file selected', 'error')
                     return redirect(request.url)
                 
-                if file and allowed_file(file.filename, app.config['ALLOWED_EXTENSIONS']):
+                if file and file.filename and allowed_file(file.filename, app.config['ALLOWED_EXTENSIONS']):
                     filename = secure_filename(file.filename)
                     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     logger.info(f"Saving file to: {filepath}")
@@ -708,17 +725,21 @@ def register_routes(app):
             
             sill_count = int(request.form.get('sill_count', 0))
             for i in range(sill_count):
-                sill_data = {
-                    'client_id': client.id,
-                    'order_number': Sill.generate_order_number(),
-                    'length': float(request.form.get(f'sill_{i}_length')),
-                    'depth': float(request.form.get(f'sill_{i}_depth')),
-                    'location': request.form.get(f'sill_{i}_location'),
-                    'color': request.form.get(f'sill_{i}_color'),
-                    'sill_type': request.form.get(f'sill_{i}_type'),
-                    'has_95mm': request.form.get(f'sill_{i}_has_95mm') == 'on'
-                }
-                new_sill = Sill(**sill_data)
+                length_str = request.form.get(f'sill_{i}_length')
+                depth_str = request.form.get(f'sill_{i}_depth')
+                
+                if not length_str or not depth_str:
+                    raise ValueError(f"Length and depth are required for sill {i}")
+                
+                new_sill = Sill()
+                new_sill.client_id = client.id
+                new_sill.order_number = Sill.generate_order_number()
+                new_sill.length = float(length_str)
+                new_sill.depth = float(depth_str)
+                new_sill.location = request.form.get(f'sill_{i}_location') or ""
+                new_sill.color = request.form.get(f'sill_{i}_color') or ""
+                new_sill.sill_type = request.form.get(f'sill_{i}_type') or ""
+                new_sill.has_95mm = request.form.get(f'sill_{i}_has_95mm') == 'on'
                 db.session.add(new_sill)
             
             db.session.commit()

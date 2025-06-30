@@ -7,6 +7,27 @@
     margin-bottom: 15px;
 }
 
+/* WhatsApp button style */
+.btn-whatsapp {
+    background-color: #0fb83c !important;
+    border-color: #0fb83c !important;
+    color: white !important;
+}
+
+.btn-whatsapp:hover {
+    background-color: #0ca535 !important;
+    border-color: #0ca535 !important;
+}
+
+/* Desktop view */
+.desktop-view {
+    display: table;
+}
+
+.mobile-view {
+    display: none;
+}
+
 /* Custom styles for sills page */
 .sill-actions {
     white-space: nowrap;
@@ -76,98 +97,176 @@ td:first-child {
     font-weight: bold;
 }
 
+/* Client card styles for mobile */
+.client-card {
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.client-card.active {
+    border-color: #b8daff;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+}
+
+.client-header {
+    background-color: #f8f9fa;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 1rem;
+    color: #2c3e50;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.client-card.active .client-header {
+    background-color: #e7f1ff;
+    color: #004085;
+}
+
+.client-info {
+    padding: 1rem;
+}
+
+.contact-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+}
+
+.contact-row:last-child {
+    margin-bottom: 0;
+}
+
+.contact-row i {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e9ecef;
+    border-radius: 50%;
+    margin-right: 0.75rem;
+    color: #495057;
+}
+
+.contact-details {
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+/* Contact buttons and actions container */
+.contact-buttons {
+    padding: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.whatsapp-btn {
+    width: 100%;
+    margin-bottom: 0.75rem;
+    padding: 0.625rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.whatsapp-btn i {
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.action-buttons-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.action-btn {
+    padding: 0.625rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.action-btn i {
+    margin-right: 0.25rem;
+}
+
 /* Responsywne style */
 @media (max-width: 768px) {
+    /* Przełączanie widoków */
+    .desktop-view {
+        display: none;
+    }
+    
+    .mobile-view {
+        display: block;
+    }
+    
     /* Ogólne dostosowania */
     .container {
         padding: 10px;
     }
     
-    /* Mniejsze nagłówki na mobile */
-    h1 {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    h2 {
-        font-size: 1.3rem;
-    }
-    
-    /* Tabele na mobile */
-    .table-responsive {
-        font-size: 0.9rem;
-    }
-    
-    /* Karty na mobile */
-    .card {
-        margin-bottom: 1rem;
-    }
-    
-    .card-body {
+    /* Client info na mobile */
+    .client-header {
+        font-size: 1rem;
         padding: 0.75rem;
     }
     
-    /* Formularze na mobile */
-    .form-control {
-        font-size: 16px; /* Zapobiega zoomowaniu na iOS */
+    .contact-row {
+        padding: 0.375rem;
     }
     
-    /* Cutting Layout na mobile */
-    .board {
-        height: 80px; /* Większa wysokość dla lepszej czytelności */
-    }
-    
-    .sill-info {
-        font-size: 0.7rem;
-    }
-    
-    .sill-length {
+    .contact-details {
         font-size: 0.9rem;
     }
     
-    .sill-details {
-        font-size: 0.7rem;
-        bottom: -30px;
+    /* Contact buttons na mobile */
+    .whatsapp-btn {
+        padding: 0.5rem;
     }
     
-    /* Przyciski na mobile */
-    .btn {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.9rem;
-        width: 100%; /* Pełna szerokość na mobile */
-        margin-bottom: 0.5rem;
+    .action-btn {
+        padding: 0.5rem;
+        font-size: 0.85rem;
     }
-    
-    /* Nawigacja na mobile */
-    .navbar-nav {
+
+    /* Settings buttons mobile view */
+    .settings-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .settings-buttons .btn {
         width: 100%;
-    }
-    
-    .nav-item {
-        width: 100%;
-        text-align: center;
+        margin: 0;
+        padding: 12px;
+        font-size: 16px;
     }
 }
 
 /* Dodatkowe style dla bardzo małych ekranów */
 @media (max-width: 576px) {
-    /* Ukryj mniej ważne kolumny w tabelach */
-    .hide-on-mobile {
-        display: none;
+    .action-buttons-container {
+        grid-template-columns: repeat(2, 1fr);
     }
     
-    /* Zmniejsz padding */
-    .container {
-        padding: 5px;
-    }
-    
-    /* Jeszcze mniejsze czcionki */
-    .sill-info {
-        font-size: 0.6rem;
-    }
-    
-    .board {
-        height: 100px; /* Jeszcze większa wysokość dla najmniejszych ekranów */
+    .sill-main-info,
+    .sill-secondary-info {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -189,3 +288,105 @@ td:first-child {
     background-position: right calc(0.375em + 0.1875rem) center;
     background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
 }
+
+/* Sill card styles for mobile */
+.sill-row {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.sill-main-info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.sill-secondary-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.sill-info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.sill-info-item small {
+    color: #6c757d;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.sill-info-item strong {
+    color: #212529;
+    font-size: 0.9rem;
+}
+
+.sill-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+/* Hamburger menu styles */
+.btn-link {
+    color: #6c757d;
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+}
+
+.btn-link:hover {
+    color: #343a40;
+}
+
+/* Responsive styles */
+@media (max-width: 767.98px) {
+    .card-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: #fff;
+    }
+
+    .sill-card {
+        margin-bottom: 1rem;
+    }
+
+    .sill-info-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .sill-actions .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    /* Ensure sills list is visible on mobile */
+    #sillsTableContainer {
+        display: block !important;
+    }
+
+    /* Hide desktop table on mobile */
+    .table-responsive.d-none.d-md-block {
+        display: none !important;
+    }
+
+    /* Show mobile view */
+    .d-md-none {
+        display: block !important;
+    }
+}
+

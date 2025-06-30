@@ -1,7 +1,10 @@
 from datetime import datetime
 import random
 from extensions import db
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Mapped
 
 class Client(db.Model):
     __allow_unmapped__ = True
@@ -16,17 +19,22 @@ class Client(db.Model):
     postal_code: str = db.Column(db.String(10), nullable=False)
     source: Optional[str] = db.Column(db.String(50), nullable=True)
     created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    sills: List['Sill'] = db.relationship('Sill', backref='client', lazy=True, cascade="all, delete-orphan")
+    
+    # Relationship without type annotation to avoid linter error
+    sills = db.relationship('Sill', backref='client', lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f'<Client {self.first_name} {self.last_name}>'
 
 class Sill(db.Model):
+    __allow_unmapped__ = True
     id: int = db.Column(db.Integer, primary_key=True)
     client_id: int = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
     order_number: str = db.Column(db.String(20), unique=True, nullable=False)
     length: float = db.Column(db.Float, nullable=False)
     depth: float = db.Column(db.Float, nullable=False)
+    high: Optional[float] = db.Column(db.Float, nullable=True)  # wysokość parapetu
+    angle: Optional[float] = db.Column(db.Float, nullable=True)  # kąt nachylenia w stopniach
     color: str = db.Column(db.String(50), nullable=False)
     sill_type: str = db.Column(db.String(50), nullable=False)
     location: str = db.Column(db.String(100), nullable=False)
@@ -45,6 +53,8 @@ class Sill(db.Model):
             'client_id': self.client_id,
             'length': self.length,
             'depth': self.depth,
+            'high': self.high,
+            'angle': self.angle,
             'color': self.color,
             'sill_type': self.sill_type,
             'location': self.location,
@@ -54,6 +64,7 @@ class Sill(db.Model):
         }
 
 class Settings(db.Model):
+    __allow_unmapped__ = True
     id: int = db.Column(db.Integer, primary_key=True)
     plate_length: float = db.Column(db.Float, nullable=False, default=6000)  # mm
     length_95mm: float = db.Column(db.Float, nullable=False, default=200)   # mm
@@ -69,6 +80,7 @@ class Settings(db.Model):
     glue_color_extra: float = db.Column(db.Float, nullable=False, default=0.05)  # bottles/m extra for colored boards
 
 class MaterialPrices(db.Model):
+    __allow_unmapped__ = True
     id: int = db.Column(db.Integer, primary_key=True)
     # Board Prices
     gp_board_price: float = db.Column(db.Float, nullable=False, default=10.0)
@@ -93,6 +105,7 @@ class MaterialPrices(db.Model):
     fitting_price_95mm: float = db.Column(db.Float, nullable=False, default=5.0)
 
 class DefaultSettings(db.Model):
+    __allow_unmapped__ = True
     id: int = db.Column(db.Integer, primary_key=True)
     plate_length: float = db.Column(db.Float, nullable=False, default=6000)  # mm
     length_95mm: float = db.Column(db.Float, nullable=False, default=200)   # mm

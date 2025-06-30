@@ -50,6 +50,16 @@
                             <input type="number" step="1" min="1" class="form-control" id="depth" name="depth" required>
                         </div>
                         <div class="mb-3">
+                            <label for="high" class="form-label">High (mm)</label>
+                            <input type="number" step="1" min="1" class="form-control" id="high" name="high">
+                            <div class="form-text">Optional - wysokość parapetu</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="angle" class="form-label">Angle (°)</label>
+                            <input type="number" step="1" min="0" max="90" class="form-control" id="angle" name="angle">
+                            <div class="form-text">Optional - kąt nachylenia (0-90 stopni)</div>
+                        </div>
+                        <div class="mb-3">
                             <label for="color" class="form-label">Color</label>
                             <select class="form-select" id="color" name="color" required>
                                 <option value="">Select color</option>
@@ -84,11 +94,15 @@
         <!-- Window Sills List -->
         <div class="col-12 col-md-8">
             <div class="card">
-                <div class="card-header">
-                    <h4>Window Sills List</h4>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Window Sills List</h4>
+                    <button class="btn btn-link d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sillsTableContainer">
+                        <i class="fas fa-bars"></i>
+                    </button>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
+                <div class="card-body collapse show d-md-block" id="sillsTableContainer">
+                    <!-- Desktop View -->
+                    <div class="table-responsive d-none d-md-block">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -96,6 +110,8 @@
                                     <th>Client ID</th>
                                     <th>Length</th>
                                     <th>Depth</th>
+                                    <th>High</th>
+                                    <th>Angle</th>
                                     <th>Color</th>
                                     <th>Type</th>
                                     <th>Location</th>
@@ -107,27 +123,101 @@
                             <tbody>
                                 {% for sill in sills %}
                                 <tr>
-                                    <td>{{ sill.id }}</td>
+                                    <td>{{ loop.index }}</td>
                                     <td>{{ sill.client.first_name }} {{ sill.client.last_name }}</td>
                                     <td>{{ sill.length }}</td>
                                     <td>{{ sill.depth }}</td>
+                                    <td>{{ sill.high if sill.high else '-' }}</td>
+                                    <td>{{ sill.angle if sill.angle else '-' }}{% if sill.angle %}°{% endif %}</td>
                                     <td>{{ sill.color }}</td>
                                     <td>{{ sill.sill_type }}</td>
                                     <td>{{ sill.location }}</td>
                                     <td>{{ "Yes" if sill.has_95mm else "No" }}</td>
                                     <td>{{ sill.order_date.strftime('%Y-%m-%d %H:%M') }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-warning" onclick="editSill({{ sill.id }}, '{{ sill.client_id }}', {{ sill.length }}, {{ sill.depth }}, '{{ sill.color }}', '{{ sill.sill_type }}', '{{ sill.location }}', {{ 'true' if sill.has_95mm else 'false' }})">
-                                            Edit
+                                        <button class="btn btn-sm btn-warning edit-sill-btn" 
+                                                data-sill-id="{{ sill.id }}"
+                                                data-client-id="{{ sill.client_id }}"
+                                                data-length="{{ sill.length }}"
+                                                data-depth="{{ sill.depth }}"
+                                                data-high="{{ sill.high if sill.high else '' }}"
+                                                data-angle="{{ sill.angle if sill.angle else '' }}"
+                                                data-color="{{ sill.color }}"
+                                                data-sill-type="{{ sill.sill_type }}"
+                                                data-location="{{ sill.location }}"
+                                                data-has-95mm="{{ sill.has_95mm }}">
+                                            <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-danger" onclick="deleteSill({{ sill.id }})">
-                                            Delete
+                                        <button class="btn btn-sm btn-danger delete-sill-btn" 
+                                                data-sill-id="{{ sill.id }}">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Mobile View -->
+                    <div class="d-md-none">
+                        {% for sill in sills %}
+                        <div class="sill-row">
+                            <div class="sill-main-info">
+                                <div class="sill-info-item">
+                                    <small>Zamówienie</small>
+                                    <strong>#{{ loop.index }}</strong>
+                                </div>
+                                <div class="sill-info-item">
+                                    <small>Długość</small>
+                                    <strong>{{ sill.length }}mm</strong>
+                                </div>
+                                <div class="sill-info-item">
+                                    <small>Głębokość</small>
+                                    <strong>{{ sill.depth }}mm</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="sill-secondary-info">
+                                <div class="sill-info-item">
+                                    <small>Wysokość</small>
+                                    <strong>{{ sill.high if sill.high else '-' }}{% if sill.high %}mm{% endif %}</strong>
+                                </div>
+                                <div class="sill-info-item">
+                                    <small>Kąt</small>
+                                    <strong>{{ sill.angle if sill.angle else '-' }}{% if sill.angle %}°{% endif %}</strong>
+                                </div>
+                                <div class="sill-info-item">
+                                    <small>Kolor</small>
+                                    <strong>{{ sill.color }}</strong>
+                                </div>
+                                <div class="sill-info-item">
+                                    <small>Typ</small>
+                                    <strong>{{ sill.sill_type }}</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="sill-actions">
+                                <button class="btn btn-warning btn-sm edit-sill-btn" 
+                                        data-sill-id="{{ sill.id }}"
+                                        data-client-id="{{ sill.client_id }}"
+                                        data-length="{{ sill.length }}"
+                                        data-depth="{{ sill.depth }}"
+                                        data-high="{{ sill.high if sill.high else '' }}"
+                                        data-angle="{{ sill.angle if sill.angle else '' }}"
+                                        data-color="{{ sill.color }}"
+                                        data-sill-type="{{ sill.sill_type }}"
+                                        data-location="{{ sill.location }}"
+                                        data-has-95mm="{{ sill.has_95mm }}">
+                                    <i class="fas fa-edit"></i> Edytuj
+                                </button>
+                                <button class="btn btn-danger btn-sm delete-sill-btn" 
+                                        data-sill-id="{{ sill.id }}">
+                                    <i class="fas fa-trash"></i> Usuń
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -160,7 +250,17 @@
                     </div>
                     <div class="mb-3">
                         <label for="edit_depth" class="form-label">Depth (mm)</label>
-                        <input type="number" step="1" class="form-control" id="edit_depth" name="depth" required>
+                        <input type="number" step="1" min="1" class="form-control" id="edit_depth" name="depth" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_high" class="form-label">High (mm)</label>
+                        <input type="number" step="1" min="1" class="form-control" id="edit_high" name="high">
+                        <div class="form-text">Optional - wysokość parapetu</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_angle" class="form-label">Angle (°)</label>
+                        <input type="number" step="1" min="0" max="90" class="form-control" id="edit_angle" name="angle">
+                        <div class="form-text">Optional - kąt nachylenia (0-90 stopni)</div>
                     </div>
                     <div class="mb-3">
                         <label for="edit_color" class="form-label">Color</label>
@@ -189,8 +289,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="saveSillChanges()">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveSillChanges()">Save Changes</button>
             </div>
         </div>
     </div>

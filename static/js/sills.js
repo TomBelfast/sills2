@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Restore last selected values
     const colorSelect = document.getElementById('color');
     const clientSelect = document.getElementById('client_id');
+    const angleInput = document.getElementById('angle');
+    const depthInput = document.getElementById('depth');
+    const highInput = document.getElementById('high');
     const clientSelectDropdown = document.getElementById('client_select');
     
     // Restore color selection
@@ -16,6 +19,24 @@ document.addEventListener('DOMContentLoaded', function() {
         clientSelect.value = lastClient;
     }
 
+    // Restore angle value
+    const lastAngle = localStorage.getItem('lastSelectedAngle');
+    if (lastAngle && angleInput && !angleInput.value) {
+        angleInput.value = lastAngle;
+    }
+
+    // Restore depth value
+    const lastDepth = localStorage.getItem('lastSelectedDepth');
+    if (lastDepth && depthInput && !depthInput.value) {
+        depthInput.value = lastDepth;
+    }
+
+    // Restore high value
+    const lastHigh = localStorage.getItem('lastSelectedHigh');
+    if (lastHigh && highInput && !highInput.value) {
+        highInput.value = lastHigh;
+    }
+
     // Save selections when they change
     if (colorSelect) {
         colorSelect.addEventListener('change', function() {
@@ -26,6 +47,30 @@ document.addEventListener('DOMContentLoaded', function() {
     if (clientSelect) {
         clientSelect.addEventListener('change', function() {
             localStorage.setItem('lastSelectedClient', this.value);
+        });
+    }
+
+    if (angleInput) {
+        angleInput.addEventListener('change', function() {
+            if (this.value) {
+                localStorage.setItem('lastSelectedAngle', this.value);
+            }
+        });
+    }
+
+    if (depthInput) {
+        depthInput.addEventListener('change', function() {
+            if (this.value) {
+                localStorage.setItem('lastSelectedDepth', this.value);
+            }
+        });
+    }
+
+    if (highInput) {
+        highInput.addEventListener('change', function() {
+            if (this.value) {
+                localStorage.setItem('lastSelectedHigh', this.value);
+            }
         });
     }
 
@@ -142,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Edit sill function
-    window.editSill = function(id, clientId, length, depth, color, sillType, location, has95mm) {
+    window.editSill = function(id, clientId, length, depth, high, angle, color, sillType, location, has95mm) {
         try {
             // Ustawianie wartości w formularzu
             const fields = {
@@ -150,6 +195,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 'edit_client': { value: clientId },
                 'edit_length': { value: length },
                 'edit_depth': { value: depth },
+                'edit_high': { value: high || '' },
+                'edit_angle': { value: angle || '' },
                 'edit_color': { value: color },
                 'edit_sill_type': { value: sillType },
                 'edit_location': { value: location },
@@ -228,3 +275,30 @@ function handleFetchError(error, action) {
     console.error(`Error during ${action}:`, error);
     alert(`An error occurred while ${action}. Please try again or contact support if the problem persists.`);
 }
+
+// Event listeners for edit and delete buttons using data attributes
+document.addEventListener('click', function(e) {
+    // Handle edit sill button clicks
+    if (e.target.closest('.edit-sill-btn')) {
+        const button = e.target.closest('.edit-sill-btn');
+        const id = button.dataset.sillId;
+        const clientId = button.dataset.clientId;
+        const length = button.dataset.length;
+        const depth = button.dataset.depth;
+        const high = button.dataset.high || null;
+        const angle = button.dataset.angle || null;
+        const color = button.dataset.color;
+        const sillType = button.dataset.sillType;
+        const location = button.dataset.location;
+        const has95mm = button.dataset.has95mm === 'True';
+        
+        editSill(id, clientId, length, depth, high, angle, color, sillType, location, has95mm);
+    }
+    
+    // Handle delete sill button clicks
+    if (e.target.closest('.delete-sill-btn')) {
+        const button = e.target.closest('.delete-sill-btn');
+        const id = button.dataset.sillId;
+        deleteSill(id);
+    }
+});

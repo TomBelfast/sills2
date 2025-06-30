@@ -82,7 +82,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped">
+                <table class="table table-hover desktop-view">
                     <thead>
                         <tr>
                             <th>First Name</th>
@@ -103,14 +103,7 @@
                             <td>{{ client.last_name }}</td>
                             <td>
                                 <strong>P:</strong> {{ client.phone }}<br>
-                                {% if client.mobile %}<strong>M:</strong> {{ client.mobile }}<br>{% endif %}
-                                <a href="https://wa.me/{{ client.phone|replace(' ', '')|replace('-', '')|replace('(', '')|replace(')', '') }}" 
-                                   onclick="this.href='https://wa.me/' + formatUKPhoneForWhatsApp('{{ client.phone }}')"
-                                   target="_blank" 
-                                   class="btn btn-success btn-sm mt-1"
-                                   title="WhatsApp">
-                                    <i class="fab fa-whatsapp"></i>
-                                </a>
+                                {% if client.mobile %}<strong>M:</strong> {{ client.mobile }}{% endif %}
                             </td>
                             <td>{{ client.email }}</td>
                             <td>{{ client.address }}</td>
@@ -119,30 +112,35 @@
                             <td>{{ client.source }}</td>
                             <td>
                                 <div class="btn-group">
+                                    <a href="https://wa.me/{{ client.phone|replace(' ', '')|replace('-', '')|replace('(', '')|replace(')', '') }}" 
+                                       onclick="this.href='https://wa.me/' + formatUKPhoneForWhatsApp('{{ client.phone }}')"
+                                       target="_blank" 
+                                       class="btn btn-whatsapp btn-sm"
+                                       title="WhatsApp">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </a>
                                     <a href="https://www.google.com/maps/search/?api=1&query={{ client.address|urlencode }}+{{ client.postal_code|urlencode }}" 
                                        target="_blank" 
                                        class="btn btn-primary btn-sm"
                                        title="Pokaż na mapie">
-                                        <i class="fas fa-map-marker-alt"></i> Mapa
+                                        <i class="fas fa-map-marker-alt"></i>
                                     </a>
                                     {% if client.email %}
                                     <a href="mailto:{{ client.email }}" 
                                        class="btn btn-info btn-sm"
                                        title="Wyślij email">
-                                        <i class="fas fa-envelope"></i> Email
+                                        <i class="fas fa-envelope"></i>
                                     </a>
                                     {% endif %}
                                     <a href="{{ url_for('set_active_client', client_id=client.id) }}" 
                                        class="btn btn-success btn-sm {% if active_client and active_client.id == client.id %}active{% endif %}">
-                                        {% if active_client and active_client.id == client.id %}
-                                            Active
-                                        {% else %}
-                                            Set Active
-                                        {% endif %}
+                                        <i class="fas fa-user-check"></i>
                                     </a>
                                     <form method="POST" action="{{ url_for('delete_client', client_id=client.id) }}" style="display: inline;">
-                                        <button type="submit" class="btn btn-danger btn-sm" 
-                                                onclick="return confirm('Are you sure you want to delete this client?')">Delete</button>
+                                        <button type="button" class="btn btn-danger btn-sm" 
+                                                onclick="showDeleteConfirmation('{{ client.id }}', '{{ client.first_name }}', '{{ client.last_name }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </form>
                                 </div>
                             </td>
@@ -150,66 +148,254 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
+                <div class="mobile-view">
+                    {% for client in clients %}
+                    <div class="client-card {% if active_client and active_client.id == client.id %}active{% endif %}">
+                        <div class="client-header">
+                            {{ client.first_name }} {{ client.last_name }}
+                            {% if active_client and active_client.id == client.id %}
+                            <span class="badge bg-primary ms-2">Aktywny</span>
+                            {% endif %}
+                        </div>
+                        <div class="client-info">
+                            <div class="contact-row">
+                                <i class="fas fa-phone"></i>
+                                <div class="contact-details">
+                                    <div><strong>Telefon:</strong> {{ client.phone }}</div>
+                                    {% if client.mobile %}
+                                    <div><strong>Komórka:</strong> {{ client.mobile }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="contact-row">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div class="contact-details">
+                                    <div>{{ client.address }}</div>
+                                    <div>{{ client.postal_code }} {{ client.town }}</div>
+                                </div>
+                            </div>
+
+                            {% if client.email %}
+                            <div class="contact-row">
+                                <i class="fas fa-envelope"></i>
+                                <div class="contact-details">
+                                    {{ client.email }}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="contact-row">
+                                <i class="fas fa-info-circle"></i>
+                                <div class="contact-details">
+                                    <strong>Źródło:</strong> {{ client.source }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-buttons">
+                            <a href="https://wa.me/{{ client.phone|replace(' ', '')|replace('-', '')|replace('(', '')|replace(')', '') }}" 
+                               onclick="this.href='https://wa.me/' + formatUKPhoneForWhatsApp('{{ client.phone }}')"
+                               target="_blank" 
+                               class="btn btn-whatsapp whatsapp-btn">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </a>
+                            
+                            <div class="action-buttons-container">
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ client.address|urlencode }}+{{ client.postal_code|urlencode }}" 
+                                   target="_blank" 
+                                   class="btn btn-primary action-btn">
+                                    <i class="fas fa-map-marker-alt"></i> Mapa
+                                </a>
+                                
+                                {% if client.email %}
+                                <a href="mailto:{{ client.email }}" 
+                                   class="btn btn-info action-btn text-white">
+                                    <i class="fas fa-envelope"></i> Email
+                                </a>
+                                {% endif %}
+                                
+                                <a href="{{ url_for('set_active_client', client_id=client.id) }}" 
+                                   class="btn btn-success action-btn {% if active_client and active_client.id == client.id %}active{% endif %}">
+                                    <i class="fas fa-user-check"></i> Aktywuj
+                                </a>
+                                
+                                <button type="button" 
+                                        class="btn btn-danger action-btn"
+                                        onclick="showDeleteConfirmation('{{ client.id }}', '{{ client.first_name }}', '{{ client.last_name }}')">
+                                    <i class="fas fa-trash"></i> Usuń
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
 
     {% if active_client %}
-    <!-- Client Orders -->
+    <!-- Window Sills List -->
     <div class="card mt-4">
         <div class="card-header">
-            Orders for {{ active_client.first_name }} {{ active_client.last_name }}
+            Window Sills List for {{ active_client.first_name }} {{ active_client.last_name }}
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table">
+            <!-- Desktop View -->
+            <div class="table-responsive d-none d-md-block">
+                <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Order Number</th>
+                            <th>ID</th>
                             <th>Length</th>
+                            <th>Depth</th>
+                            <th>High</th>
+                            <th>Angle</th>
+                            <th>Color</th>
                             <th>Type</th>
-                            <th>Status</th>
+                            <th>Location</th>
+                            <th>Has 95mm</th>
                             <th>Order Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for sill in active_client.sills %}
                         <tr>
-                            <td>{{ sill.order_number }}</td>
-                            <td>{{ sill.length }}mm</td>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ sill.length }}</td>
+                            <td>{{ sill.depth }}</td>
+                            <td>{{ sill.high if sill.high else '-' }}</td>
+                            <td>{{ sill.angle if sill.angle else '-' }}{% if sill.angle %}°{% endif %}</td>
+                            <td>{{ sill.color }}</td>
                             <td>{{ sill.sill_type }}</td>
-                            <td>{{ sill.status }}</td>
-                            <td>{{ sill.order_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ sill.location }}</td>
+                            <td>{{ "Yes" if sill.has_95mm else "No" }}</td>
+                            <td>{{ sill.order_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning edit-sill-btn" 
+                                        data-sill-id="{{ sill.id }}"
+                                        data-client-id="{{ sill.client_id }}"
+                                        data-length="{{ sill.length }}"
+                                        data-depth="{{ sill.depth }}"
+                                        data-high="{{ sill.high if sill.high else '' }}"
+                                        data-angle="{{ sill.angle if sill.angle else '' }}"
+                                        data-color="{{ sill.color }}"
+                                        data-sill-type="{{ sill.sill_type }}"
+                                        data-location="{{ sill.location }}"
+                                        data-has-95mm="{{ sill.has_95mm }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger delete-sill-btn" 
+                                        data-sill-id="{{ sill.id }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Mobile View -->
+            <div class="d-md-none">
+                {% for sill in active_client.sills %}
+                <div class="sill-row">
+                    <div class="sill-main-info">
+                        <div class="sill-info-item">
+                            <small>Zamówienie</small>
+                            <strong>#{{ loop.index }}</strong>
+                        </div>
+                        <div class="sill-info-item">
+                            <small>Długość</small>
+                            <strong>{{ sill.length }}mm</strong>
+                        </div>
+                        <div class="sill-info-item">
+                            <small>Głębokość</small>
+                            <strong>{{ sill.depth }}mm</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="sill-secondary-info">
+                        <div class="sill-info-item">
+                            <small>Wysokość</small>
+                            <strong>{{ sill.high if sill.high else '-' }}{% if sill.high %}mm{% endif %}</strong>
+                        </div>
+                        <div class="sill-info-item">
+                            <small>Kąt</small>
+                            <strong>{{ sill.angle if sill.angle else '-' }}{% if sill.angle %}°{% endif %}</strong>
+                        </div>
+                        <div class="sill-info-item">
+                            <small>Kolor</small>
+                            <strong>{{ sill.color }}</strong>
+                        </div>
+                        <div class="sill-info-item">
+                            <small>Typ</small>
+                            <strong>{{ sill.sill_type }}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="sill-actions">
+                        <button class="btn btn-warning btn-sm edit-sill-btn" 
+                                data-sill-id="{{ sill.id }}"
+                                data-client-id="{{ sill.client_id }}"
+                                data-length="{{ sill.length }}"
+                                data-depth="{{ sill.depth }}"
+                                data-high="{{ sill.high if sill.high else '' }}"
+                                data-angle="{{ sill.angle if sill.angle else '' }}"
+                                data-color="{{ sill.color }}"
+                                data-sill-type="{{ sill.sill_type }}"
+                                data-location="{{ sill.location }}"
+                                data-has-95mm="{{ sill.has_95mm }}">
+                            <i class="fas fa-edit"></i> Edytuj
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-sill-btn" 
+                                data-sill-id="{{ sill.id }}">
+                            <i class="fas fa-trash"></i> Usuń
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
     {% endif %}
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete client: <strong id="clientNameToDelete"></strong>?</p>
+                <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteClientForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete Client</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showDeleteConfirmation(clientId, firstName, lastName) {
+    const modal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+    document.getElementById('clientNameToDelete').textContent = `${firstName} ${lastName}`;
+    document.getElementById('deleteClientForm').action = `/delete_client/${clientId}`;
+    modal.show();
+}
+</script>
+
 {% block extra_js %}
 <!-- Dodaj Font Awesome dla ikony mapy -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-<script>
-function formatUKPhoneForWhatsApp(phone) {
-    // Usuń wszystkie spacje, myślniki i inne znaki specjalne
-    let cleanPhone = phone.replace(/[^0-9+]/g, '');
-    
-    // Jeśli numer zaczyna się od '0', usuń zero i dodaj '+44'
-    if (cleanPhone.startsWith('0')) {
-        cleanPhone = '+44' + cleanPhone.substring(1);
-    }
-    // Jeśli numer nie zaczyna się od '+', dodaj '+44'
-    else if (!cleanPhone.startsWith('+')) {
-        cleanPhone = '+44' + cleanPhone;
-    }
-    
-    return cleanPhone;
-}
-</script>
 {% endblock %}
 {% endblock %}

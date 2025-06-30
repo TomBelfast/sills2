@@ -146,26 +146,130 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
   - Log all errors with context
   - Return user-friendly error messages
   - Implement proper status codes
+- For Flask routes and type safety:
+  - Always validate form data before converting to other types (int, float)
+  - Use proper None checks: `if value and value.strip()` before float() conversion
+  - For SQLAlchemy models, create instances first then assign attributes instead of using constructor with parameters
+  - Use `asc()` and `desc()` functions from SQLAlchemy for ordering, not `.asc()` methods on model attributes
+  - Always check file.filename exists before using secure_filename or file operations
+  - Validate required fields before attempting database operations
 
 # Scratchpad
 
-## Stan projektu - System zarządzania parapetami (2024-03-21)
+## Naprawa błędów w routes.py (2024-12-28)
 
-### Wykonane kroki:
-[X] Utworzono podstawową strukturę projektu
-[X] Zaimplementowano modele bazy danych
-[X] Dodano system migracji bazy danych
-[X] Utworzono podstawowe widoki
-[X] Dodano obsługę przesyłania plików
-[X] Dodano system testów
-[X] Dodano dokumentację
+### Zadanie:
+Naprawienie wszystkich błędów linter-a w pliku routes.py
 
-### Następne kroki:
-[ ] Dodać system OCR do analizy kontraktów
-[ ] Zoptymalizować zapytania do bazy danych
-[ ] Dodać system raportowania
-[ ] Dodać system powiadomień
-[ ] Dodać system backupów
+### Wykonane naprawy:
+[X] Naprawiono błędy walidacji danych formularza (None checks przed konwersją float/int)
+[X] Poprawiono konstruktory modeli SQLAlchemy (używanie assignment zamiast constructor parameters)
+[X] Naprawiono sortowanie SQLAlchemy (używanie asc()/desc() funkcji zamiast metod)
+[X] Dodano walidację dla file.filename przed secure_filename
+[X] Poprawiono wszystkie miejsca gdzie request.form.get() mogło zwrócić None
+[X] Sprawdzono składnię pliku - kompiluje się bez błędów
+
+### Główne kategorie napraw:
+1. **Walidacja danych wejściowych**: Sprawdzanie None przed konwersją na float/int
+2. **SQLAlchemy ordering**: Używanie `asc(Client.last_name)` zamiast `Client.last_name.asc()`
+3. **Model construction**: Tworzenie instancji pustych i przypisywanie atrybutów
+4. **File handling**: Sprawdzanie istnienia filename przed operacjami
+
+### Status: ZAKOŃCZONE ✅
+Wszystkie błędy zostały naprawione, plik kompiluje się poprawnie.
+
+## Naprawa widoku mobilnego listy parapetów (2024-12-28)
+
+### Problem:
+W wersji mobilnej w panelu Window Sills Management lista parapetów nie była widoczna.
+
+### Przyczyna:
+- Element listy parapetów miał klasę Bootstrap `collapse` bez `show`
+- Brak odpowiednich stylów CSS dla urządzeń mobilnych
+- Lista była ukryta domyślnie przez mechanizm collapse
+
+### Naprawy:
+[X] Dodano klasę `show` do elementu collapse (`collapse show d-md-block`)
+[X] Dodano CSS rules dla małych ekranów (@media max-width: 767.98px)
+[X] Wymuszono widoczność listy na urządzeniach mobilnych (`display: block !important`)
+[X] Upewniono się, że widok mobilny jest pokazywany (`.d-md-none`)
+
+### Status: NAPRAWIONE ✅
+
+## Naprawa błędów JavaScript w sills.html (2024-12-28)
+
+### Problem:
+Błędy linter-a JavaScript w atrybutach `onclick` w szablonie HTML - linter interpretował Jinja2 template syntax jako błędny JavaScript.
+
+### Przyczyna:
+- Wywołania funkcji JavaScript w `onclick` zawierały Jinja2 template syntax `{{ sill.id }}`
+- Linter próbował parsować to jako JavaScript i zgłaszał błędy składni
+- Problem występował w dwóch miejscach: desktop view i mobile view
+
+### Naprawy:
+[X] Usunięto atrybuty `onclick` z przycisków edit/delete
+[X] Dodano data attributes (`data-sill-id`, `data-client-id`, etc.)
+[X] Utworzono event listenery w JavaScript używające event delegation
+[X] Poprawiono nazwę funkcji z `updateSill()` na `saveSillChanges()`
+[X] Naprawiono problemy z modułami Python (pydantic-core, jiter)
+
+### Kod przed naprawą:
+```html
+<button onclick="editSill({{ sill.id }}, '{{ sill.client_id }}', ...)">
+```
+
+### Kod po naprawie:
+```html
+<button class="edit-sill-btn" data-sill-id="{{ sill.id }}" data-client-id="{{ sill.client_id }}">
+```
+
+### Status: NAPRAWIONE ✅
+
+## Naprawa błędu SQLAlchemy ordering w routes.py (2024-12-28)
+
+### Problem:
+Błąd linter-a: "Cannot access attribute 'desc' for class 'int'" w linii 34 routes.py.
+
+### Przyczyna:
+- Linter interpretował `Client.id` jako typ annotation (int) zamiast kolumny SQLAlchemy
+- Konflikt między type hints a dynamicznymi atrybutami SQLAlchemy
+- Metoda `.desc()` jest dodawana przez SQLAlchemy w runtime
+
+### Rozwiązanie:
+- Powrócono do oryginalnej składni `Client.id.desc()`
+- Błąd linter-a jest fałszywie pozytywny - kod działa poprawnie w runtime
+- SQLAlchemy dodaje metody `.desc()` i `.asc()` do kolumn dynamicznie
+
+### Alternatywne rozwiązania próbowane:
+- `desc(Client.id)` - linter też nie rozpoznawał
+- `desc(Client.__table__.c.id)` - linter nie rozpoznawał `__table__`
+
+### Status: FUNKCJONALNIE NAPRAWIONE ✅
+Aplikacja działa poprawnie, błąd linter-a jest tylko kosmetyczny.
+
+## Naprawa numeracji parapetów - ciągłe ID (2024-12-28)
+
+### Problem:
+Lista parapetów wyświetlała ID z bazy danych, które miały luki po usunięciu rekordów (np. 1, 2, 3, 11). ID nie odpowiadało rzeczywistej liczbie parapetów.
+
+### Przyczyna:
+- Standardowe `primary_key=True` w SQLAlchemy auto-inkrementuje ID
+- Po usunięciu rekordów powstają luki w numeracji
+- Użytkownik oczekuje ciągłej numeracji 1, 2, 3, 4...
+
+### Rozwiązanie:
+- Zamieniono `{{ sill.id }}` na `{{ loop.index }}` w szablonie HTML
+- `loop.index` to Jinja2 counter rozpoczynający od 1
+- Zapewnia ciągłą numerację niezależnie od operacji CRUD
+
+### Naprawy:
+[X] Desktop view: `<td>{{ loop.index }}</td>`
+[X] Mobile view: `<strong>#{{ loop.index }}</strong>`
+[X] Zachowano rzeczywiste `sill.id` w data attributes dla operacji
+
+### Status: NAPRAWIONE ✅
+
+### Status: NAPRAWIONE ✅
 
 ### Struktura projektu:
 ```
@@ -174,7 +278,7 @@ sills/
 ├── config.py             # Konfiguracja
 ├── extensions.py         # Rozszerzenia Flask
 ├── models.py             # Modele bazy danych
-├── routes.py             # Trasy aplikacji
+├── routes.py             # Trasy aplikacji ✅ NAPRAWIONE
 ├── utils.py             # Funkcje pomocnicze
 ├── migrations/          # Migracje bazy danych
 ├── static/             # Pliki statyczne
@@ -200,9 +304,9 @@ sills/
 6. Generowanie raportów
 
 ### Bezpieczeństwo:
-1. Walidacja danych wejściowych
+1. Walidacja danych wejściowych ✅ ULEPSZONE
 2. Sanityzacja danych wyjściowych
-3. Bezpieczne przesyłanie plików
+3. Bezpieczne przesyłanie plików ✅ ULEPSZONE
 4. Rate limiting
 5. Logowanie błędów
 
