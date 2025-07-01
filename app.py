@@ -130,7 +130,7 @@ if __name__ == '__main__':
     if init_db_connection(app):
         if auto_manage_database(app):
             logger.info("Database management completed successfully")
-            app.run(host='0.0.0.0', port=55555, debug=True)
+            app.run(host='0.0.0.0', port=56666, debug=True)
         else:
             logger.error("Failed to manage database")
     else:

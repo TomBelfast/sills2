@@ -24,7 +24,7 @@ ENV FLASK_ENV=production
 ENV PYTHONPATH=/app
 
 # Expose port
-EXPOSE 55555
+EXPOSE 56666
 
 # Create non-root user and set permissions
 RUN useradd -m -u 1000 appuser && \
