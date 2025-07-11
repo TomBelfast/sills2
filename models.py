@@ -107,9 +107,9 @@ class MaterialPrices(db.Model):
 class DefaultSettings(db.Model):
     __allow_unmapped__ = True
     id: int = db.Column(db.Integer, primary_key=True)
-    plate_length: float = db.Column(db.Float, nullable=False, default=6000)  # mm
+    plate_length: float = db.Column(db.Float, nullable=False, default=5000)  # mm
     length_95mm: float = db.Column(db.Float, nullable=False, default=200)   # mm
-    cutting_allowance: float = db.Column(db.Float, nullable=False, default=2)  # mm
+    cutting_allowance: float = db.Column(db.Float, nullable=False, default=100)  # mm
     
     # Material usage per meter
     hot_glue_per_meter: float = db.Column(db.Float, nullable=False, default=0.05)  # sticks/m
