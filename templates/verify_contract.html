@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container-fluid mt-5">
     <div class="row">
-        <!-- Lewa kolumna - podgląd zdjęcia -->
+        <!-- Left column - image preview -->
         <div class="col-md-6">
             <div class="card mb-4">
                 <div class="card-header">
@@ -17,7 +17,7 @@
                              id="contractImage"
                              style="cursor: zoom-in;">
                     </div>
-                    <!-- Modal do powiększenia zdjęcia -->
+                    <!-- Modal for image zoom -->
                     <div class="modal fade" id="imageModal" tabindex="-1">
                         <div class="modal-dialog modal-xl">
                             <div class="modal-content">
@@ -36,7 +36,7 @@
                 </div>
             </div>
 
-            <!-- Rozpoznany tekst -->
+            <!-- Recognized text -->
             <div class="card">
                 <div class="card-header">
                     <h2 class="text-center">Recognized Text</h2>
@@ -47,7 +47,7 @@
             </div>
         </div>
 
-        <!-- Prawa kolumna - formularz weryfikacji -->
+        <!-- Right column - verification form -->
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
@@ -63,7 +63,7 @@
                     {% endwith %}
 
                     <form method="POST" action="{{ url_for('save_contract') }}" class="needs-validation" novalidate>
-                        <!-- Dane klienta -->
+                        <!-- Client data -->
                         <div class="card mb-4">
                             <div class="card-header bg-primary text-white">
                                 <h3 class="mb-0">Client Details</h3>
@@ -194,7 +194,7 @@
                             </div>
                         </div>
 
-                        <!-- Dane parapetów -->
+                        <!-- Sills data -->
                         <div class="card mb-4">
                             <div class="card-header bg-primary text-white">
                                 <h3 class="mb-0">Window Sills ({{ sills_data|length }} found)</h3>

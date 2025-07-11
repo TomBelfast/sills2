@@ -122,13 +122,13 @@
                                     <a href="https://www.google.com/maps/search/?api=1&query={{ client.address|urlencode }}+{{ client.postal_code|urlencode }}" 
                                        target="_blank" 
                                        class="btn btn-primary btn-sm"
-                                       title="Pokaż na mapie">
+                                       title="Show on map">
                                         <i class="fas fa-map-marker-alt"></i>
                                     </a>
                                     {% if client.email %}
                                     <a href="mailto:{{ client.email }}" 
                                        class="btn btn-info btn-sm"
-                                       title="Wyślij email">
+                                       title="Send email">
                                         <i class="fas fa-envelope"></i>
                                     </a>
                                     {% endif %}
@@ -155,16 +155,16 @@
                         <div class="client-header">
                             {{ client.first_name }} {{ client.last_name }}
                             {% if active_client and active_client.id == client.id %}
-                            <span class="badge bg-primary ms-2">Aktywny</span>
+                            <span class="badge bg-primary ms-2">Active</span>
                             {% endif %}
                         </div>
                         <div class="client-info">
                             <div class="contact-row">
                                 <i class="fas fa-phone"></i>
                                 <div class="contact-details">
-                                    <div><strong>Telefon:</strong> {{ client.phone }}</div>
+                                    <div><strong>Phone:</strong> {{ client.phone }}</div>
                                     {% if client.mobile %}
-                                    <div><strong>Komórka:</strong> {{ client.mobile }}</div>
+                                    <div><strong>Mobile:</strong> {{ client.mobile }}</div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -189,7 +189,7 @@
                             <div class="contact-row">
                                 <i class="fas fa-info-circle"></i>
                                 <div class="contact-details">
-                                    <strong>Źródło:</strong> {{ client.source }}
+                                    <strong>Source:</strong> {{ client.source }}
                                 </div>
                             </div>
                         </div>
@@ -206,7 +206,7 @@
                                 <a href="https://www.google.com/maps/search/?api=1&query={{ client.address|urlencode }}+{{ client.postal_code|urlencode }}" 
                                    target="_blank" 
                                    class="btn btn-primary action-btn">
-                                    <i class="fas fa-map-marker-alt"></i> Mapa
+                                    <i class="fas fa-map-marker-alt"></i> Map
                                 </a>
                                 
                                 {% if client.email %}
@@ -218,13 +218,13 @@
                                 
                                 <a href="{{ url_for('set_active_client', client_id=client.id) }}" 
                                    class="btn btn-success action-btn {% if active_client and active_client.id == client.id %}active{% endif %}">
-                                    <i class="fas fa-user-check"></i> Aktywuj
+                                    <i class="fas fa-user-check"></i> Activate
                                 </a>
                                 
                                 <button type="button" 
                                         class="btn btn-danger action-btn"
                                         onclick="showDeleteConfirmation('{{ client.id }}', '{{ client.first_name }}', '{{ client.last_name }}')">
-                                    <i class="fas fa-trash"></i> Usuń
+                                    <i class="fas fa-trash"></i> Delete
                                 </button>
                             </div>
                         </div>
@@ -304,34 +304,34 @@
                 <div class="sill-row">
                     <div class="sill-main-info">
                         <div class="sill-info-item">
-                            <small>Zamówienie</small>
+                            <small>Order</small>
                             <strong>#{{ loop.index }}</strong>
                         </div>
                         <div class="sill-info-item">
-                            <small>Długość</small>
+                            <small>Length</small>
                             <strong>{{ sill.length }}mm</strong>
                         </div>
                         <div class="sill-info-item">
-                            <small>Głębokość</small>
+                            <small>Depth</small>
                             <strong>{{ sill.depth }}mm</strong>
                         </div>
                     </div>
                     
                     <div class="sill-secondary-info">
                         <div class="sill-info-item">
-                            <small>Wysokość</small>
+                            <small>High</small>
                             <strong>{{ sill.high if sill.high else '-' }}{% if sill.high %}mm{% endif %}</strong>
                         </div>
                         <div class="sill-info-item">
-                            <small>Kąt</small>
+                            <small>Angle</small>
                             <strong>{{ sill.angle if sill.angle else '-' }}{% if sill.angle %}°{% endif %}</strong>
                         </div>
                         <div class="sill-info-item">
-                            <small>Kolor</small>
+                            <small>Color</small>
                             <strong>{{ sill.color }}</strong>
                         </div>
                         <div class="sill-info-item">
-                            <small>Typ</small>
+                            <small>Type</small>
                             <strong>{{ sill.sill_type }}</strong>
                         </div>
                     </div>
@@ -348,11 +348,11 @@
                                 data-sill-type="{{ sill.sill_type }}"
                                 data-location="{{ sill.location }}"
                                 data-has-95mm="{{ sill.has_95mm }}">
-                            <i class="fas fa-edit"></i> Edytuj
+                            <i class="fas fa-edit"></i> Edit
                         </button>
                         <button class="btn btn-danger btn-sm delete-sill-btn" 
                                 data-sill-id="{{ sill.id }}">
-                            <i class="fas fa-trash"></i> Usuń
+                            <i class="fas fa-trash"></i> Delete
                         </button>
                     </div>
                 </div>

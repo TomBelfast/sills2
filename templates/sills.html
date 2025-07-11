@@ -52,12 +52,12 @@
                         <div class="mb-3">
                             <label for="high" class="form-label">High (mm)</label>
                             <input type="number" step="1" min="1" class="form-control" id="high" name="high">
-                            <div class="form-text">Optional - wysokość parapetu</div>
+                            <div class="form-text">Optional - sill height</div>
                         </div>
                         <div class="mb-3">
                             <label for="angle" class="form-label">Angle (°)</label>
                             <input type="number" step="1" min="0" max="90" class="form-control" id="angle" name="angle">
-                            <div class="form-text">Optional - kąt nachylenia (0-90 stopni)</div>
+                            <div class="form-text">Optional - angle (0-90 degrees)</div>
                         </div>
                         <div class="mb-3">
                             <label for="color" class="form-label">Color</label>
@@ -165,34 +165,34 @@
                         <div class="sill-row">
                             <div class="sill-main-info">
                                 <div class="sill-info-item">
-                                    <small>Zamówienie</small>
+                                    <small>Order</small>
                                     <strong>#{{ loop.index }}</strong>
                                 </div>
                                 <div class="sill-info-item">
-                                    <small>Długość</small>
+                                    <small>Length</small>
                                     <strong>{{ sill.length }}mm</strong>
                                 </div>
                                 <div class="sill-info-item">
-                                    <small>Głębokość</small>
+                                    <small>Depth</small>
                                     <strong>{{ sill.depth }}mm</strong>
                                 </div>
                             </div>
                             
                             <div class="sill-secondary-info">
                                 <div class="sill-info-item">
-                                    <small>Wysokość</small>
+                                    <small>High</small>
                                     <strong>{{ sill.high if sill.high else '-' }}{% if sill.high %}mm{% endif %}</strong>
                                 </div>
                                 <div class="sill-info-item">
-                                    <small>Kąt</small>
+                                    <small>Angle</small>
                                     <strong>{{ sill.angle if sill.angle else '-' }}{% if sill.angle %}°{% endif %}</strong>
                                 </div>
                                 <div class="sill-info-item">
-                                    <small>Kolor</small>
+                                    <small>Color</small>
                                     <strong>{{ sill.color }}</strong>
                                 </div>
                                 <div class="sill-info-item">
-                                    <small>Typ</small>
+                                    <small>Type</small>
                                     <strong>{{ sill.sill_type }}</strong>
                                 </div>
                             </div>
@@ -209,11 +209,11 @@
                                         data-sill-type="{{ sill.sill_type }}"
                                         data-location="{{ sill.location }}"
                                         data-has-95mm="{{ sill.has_95mm }}">
-                                    <i class="fas fa-edit"></i> Edytuj
+                                    <i class="fas fa-edit"></i> Edit
                                 </button>
                                 <button class="btn btn-danger btn-sm delete-sill-btn" 
                                         data-sill-id="{{ sill.id }}">
-                                    <i class="fas fa-trash"></i> Usuń
+                                    <i class="fas fa-trash"></i> Delete
                                 </button>
                             </div>
                         </div>
@@ -255,12 +255,12 @@
                     <div class="mb-3">
                         <label for="edit_high" class="form-label">High (mm)</label>
                         <input type="number" step="1" min="1" class="form-control" id="edit_high" name="high">
-                        <div class="form-text">Optional - wysokość parapetu</div>
+                        <div class="form-text">Optional - sill height</div>
                     </div>
                     <div class="mb-3">
                         <label for="edit_angle" class="form-label">Angle (°)</label>
                         <input type="number" step="1" min="0" max="90" class="form-control" id="edit_angle" name="angle">
-                        <div class="form-text">Optional - kąt nachylenia (0-90 stopni)</div>
+                        <div class="form-text">Optional - angle (0-90 degrees)</div>
                     </div>
                     <div class="mb-3">
                         <label for="edit_color" class="form-label">Color</label>

@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Edit sill function
     window.editSill = function(id, clientId, length, depth, high, angle, color, sillType, location, has95mm) {
         try {
-            // Ustawianie wartości w formularzu
+            // Set values in the form
             const fields = {
                 'edit_sill_id': { value: id },
                 'edit_client': { value: clientId },
@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'edit_has_95mm': { checked: has95mm }
             };
 
-            // Ustawianie wartości dla każdego pola
+            // Set value for each field
             Object.entries(fields).forEach(([elementId, props]) => {
                 const element = document.getElementById(elementId);
                 if (element) {
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            // Pokazanie modalu
+            // Show modal
             const editModal = new bootstrap.Modal(document.getElementById('editModal'));
             editModal.show();
         } catch (error) {

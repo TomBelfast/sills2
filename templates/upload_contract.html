@@ -17,7 +17,7 @@
                         {% endif %}
                     {% endwith %}
 
-                    <!-- Animacja ładowania -->
+                    <!-- Loading animation -->
                     <div id="loading" class="text-center" style="display: none;">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
@@ -69,7 +69,7 @@
                     event.preventDefault()
                     event.stopPropagation()
                 } else {
-                    // Pokaż animację ładowania
+                    // Show loading animation
                     document.getElementById('loading').style.display = 'block';
                     document.getElementById('submitBtn').disabled = true;
                 }

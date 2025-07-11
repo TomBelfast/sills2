@@ -33,8 +33,8 @@ class Sill(db.Model):
     order_number: str = db.Column(db.String(20), unique=True, nullable=False)
     length: float = db.Column(db.Float, nullable=False)
     depth: float = db.Column(db.Float, nullable=False)
-    high: Optional[float] = db.Column(db.Float, nullable=True)  # wysokość parapetu
-    angle: Optional[float] = db.Column(db.Float, nullable=True)  # kąt nachylenia w stopniach
+    high: Optional[float] = db.Column(db.Float, nullable=True)  # sill height
+    angle: Optional[float] = db.Column(db.Float, nullable=True)  # angle in degrees
     color: str = db.Column(db.String(50), nullable=False)
     sill_type: str = db.Column(db.String(50), nullable=False)
     location: str = db.Column(db.String(100), nullable=False)
@@ -71,7 +71,7 @@ class Settings(db.Model):
     cutting_allowance: float = db.Column(db.Float, nullable=False, default=2)  # mm
     
     # Material usage per meter
-    hot_glue_per_meter: float = db.Column(db.Float, nullable=False, default=0.05)  # pieces/m
+    hot_glue_per_meter: float = db.Column(db.Float, nullable=False, default=0.05)  # sticks/m
     glue_with_activator_per_meter: float = db.Column(db.Float, nullable=False, default=0.05)  # bottles/m
     silicone_per_meter: float = db.Column(db.Float, nullable=False, default=0.1)  # bottles/m
     silicone_color_per_meter: float = db.Column(db.Float, nullable=False, default=0.1)  # bottles/m
