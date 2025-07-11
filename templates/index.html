@@ -4,6 +4,17 @@
 
 {% block content %}
 <div class="container mt-4">
+    <div class="alert alert-info" role="alert">
+        <h4 class="alert-heading">How to use the Window Sills Management App</h4>
+        <ol class="mb-0">
+            <li><strong>Add a new client:</strong> Go to the "Clients" section and fill in the client details.</li>
+            <li><strong>Select an active client:</strong> Click the "Activate" button next to the client you want to work with.</li>
+            <li><strong>Add window sills:</strong> Go to the "Window Sills" section and add sills for the selected client.</li>
+            <li><strong>Calculate materials and costs:</strong> Use the "Materials" and "Price" sections to see required materials and total costs.</li>
+            <li><strong>Upload and verify contracts:</strong> In the "Upload Contract" section, upload a contract image and verify extracted data.</li>
+            <li><strong>Settings:</strong> Adjust material parameters and prices in the "Settings" section if needed.</li>
+        </ol>
+    </div>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
