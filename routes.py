@@ -716,52 +716,37 @@ def register_routes(app):
                 client = existing_client
                 logger.info(f"Using existing client: {first_name} {last_name}")
             else:
-                # Create new client - only use fields that exist in Client model
+                # Create new client
                 client_data = {
                     'first_name': first_name,
                     'last_name': last_name,
-                    'address': request.form.get('address', ''),
-                    'town': request.form.get('town', ''),
-                    'postal_code': request.form.get('postal_code', ''),
+                    'address': request.form.get('address'),
+                    'town': request.form.get('town'),
+                    'postal_code': request.form.get('postal_code'),
                     'phone': phone,
-                    'mobile': request.form.get('mobile', ''),
-                    'email': request.form.get('email', ''),
-                    'source': request.form.get('source', '')
+                    'mobile': request.form.get('mobile'),
+                    'email': request.form.get('email'),
+                    'source': request.form.get('source')
                 }
                 
-                # Create Client instance manually to avoid **kwargs issues
-                client = Client()
-                client.first_name = client_data['first_name']
-                client.last_name = client_data['last_name']
-                client.address = client_data['address']
-                client.town = client_data['town']
-                client.postal_code = client_data['postal_code']
-                client.phone = client_data['phone']
-                client.mobile = client_data['mobile']
-                client.email = client_data['email']
-                client.source = client_data['source']
-                
+                client = Client(**client_data)
                 db.session.add(client)
                 db.session.flush()
                 logger.info(f"Created new client: {first_name} {last_name} with phone: {phone}")
             
             sill_count = int(request.form.get('sill_count', 0))
             for i in range(sill_count):
-                length_str = request.form.get(f'sill_{i}_length')
-                depth_str = request.form.get(f'sill_{i}_depth')
-                
-                if not length_str or not depth_str:
-                    raise ValueError(f"Length and depth are required for sill {i}")
-                
-                new_sill = Sill()
-                new_sill.client_id = client.id
-                new_sill.order_number = Sill.generate_order_number()
-                new_sill.length = float(length_str)
-                new_sill.depth = float(depth_str)
-                new_sill.location = request.form.get(f'sill_{i}_location') or ""
-                new_sill.color = request.form.get(f'sill_{i}_color') or ""
-                new_sill.sill_type = request.form.get(f'sill_{i}_type') or ""
-                new_sill.has_95mm = request.form.get(f'sill_{i}_has_95mm') == 'on'
+                sill_data = {
+                    'client_id': client.id,
+                    'order_number': Sill.generate_order_number(),
+                    'length': float(request.form.get(f'sill_{i}_length')),
+                    'depth': float(request.form.get(f'sill_{i}_depth')),
+                    'location': request.form.get(f'sill_{i}_location'),
+                    'color': request.form.get(f'sill_{i}_color'),
+                    'sill_type': request.form.get(f'sill_{i}_type'),
+                    'has_95mm': request.form.get(f'sill_{i}_has_95mm') == 'on'
+                }
+                new_sill = Sill(**sill_data)
                 db.session.add(new_sill)
             
             db.session.commit()

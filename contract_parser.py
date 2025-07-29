@@ -6,6 +6,7 @@ import re
 import time
 from typing import Dict, List, Tuple, Optional
 from PIL import Image
+from openai import OpenAI as OpenAIClient
 
 logger = logging.getLogger(__name__)
 
@@ -15,28 +16,8 @@ class ContractParser:
         self.logger.info("Initializing ContractParser...")
         api_key = os.getenv('OPENAI_API_KEY')
         self.logger.info(f"API key loaded: {'SET' if api_key else 'NOT SET'}")
-        
-        if not api_key:
-            self.logger.warning("OpenAI API key not set. Contract analysis will be limited.")
-            self.openai_client = None
-        else:
-            try:
-                # Try newer OpenAI API first
-                import openai
-                self.openai_client = openai.OpenAI(api_key=api_key)
-                self.logger.info("OpenAI client created successfully (new API)")
-            except Exception as e:
-                self.logger.warning(f"Failed to create OpenAI client with new API: {e}")
-                try:
-                    # Fallback to older OpenAI API
-                    import openai
-                    openai.api_key = api_key
-                    self.openai_client = openai
-                    self.logger.info("OpenAI client created successfully (old API)")
-                except Exception as e2:
-                    self.logger.error(f"Failed to create OpenAI client: {e2}")
-                    self.openai_client = None
-        
+        self.client = OpenAIClient(api_key=api_key)
+        self.logger.info("OpenAI client created successfully")
         self.max_retries = 3
         self.retry_delay = 2
 
@@ -45,11 +26,6 @@ class ContractParser:
         Extracts text from an image using OpenAI API with retry mechanism.
         """
         self.logger.info(f"Starting text extraction from: {image_path}")
-        
-        if not self.openai_client:
-            self.logger.error("OpenAI client not available. Please set OPENAI_API_KEY environment variable.")
-            raise ValueError("OpenAI API key not configured. Please set OPENAI_API_KEY environment variable to use contract analysis.")
-        
         last_error = None
         extracted_text = ""
 
@@ -64,19 +40,15 @@ class ContractParser:
 
                 # Prepare API request with detailed instructions
                 self.logger.info("Sending request to OpenAI API...")
-                
-                # Check if using new or old API
-                if hasattr(self.openai_client, 'chat'):
-                    # New API (openai.OpenAI())
-                    response = self.openai_client.chat.completions.create(
-                        model="gpt-4o",
-                        messages=[
-                            {
-                                "role": "user",
-                                "content": [
-                                    {
-                                        "type": "text",
-                                        "text": """Analyze this contract and extract the following information:
+                response = self.client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": """Analyze this contract and extract the following information:
 
 1. Client Details:
    - Full name (including title if present)
@@ -123,94 +95,23 @@ Window Sills:
    U/Side: [Yes/No]
 
 [Continue for all window sills found]"""
-                                    },
-                                    {
-                                        "type": "image_url",
-                                        "image_url": {
-                                            "url": f"data:image/jpeg;base64,{base64_image}"
-                                        }
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/jpeg;base64,{base64_image}"
                                     }
-                                ]
-                            }
-                        ],
-                        max_tokens=2000,
-                        temperature=0.3
-                    )
-                    extracted_text = response.choices[0].message.content
-                else:
-                    # Old API (openai.api_key = ...)
-                    response = self.openai_client.ChatCompletion.create(
-                        model="gpt-4o",
-                        messages=[
-                            {
-                                "role": "user",
-                                "content": [
-                                    {
-                                        "type": "text",
-                                        "text": """Analyze this contract and extract the following information:
-
-1. Client Details:
-   - Full name (including title if present)
-   - Complete street address (house number and street name only - NO town or postcode)
-   - Town/city name (separate from address)
-   - Post code (UK format)
-   - Phone number (landline)
-   - Mobile number (if different from phone)
-   - Email address
-   - Contract source
-
-2. Window Sills:
-   - Location in the house/building
-   - Sill type (ONLY: Straight, C-shaped, Bay-Curve shaped, or Conservatory)
-   - Color (ONLY the color name like: White, Black Grain, Oak, Cream, Anthracite Grey, etc.)
-   - Dimensions in millimeters
-   - Whether it has a 95mm side (U/Side)
-
-IMPORTANT: Keep Type and Color completely separate. Do NOT combine them.
-
-Return the data in exactly this format:
-
-Client Details:
-- Name: [Full Name]
-- Address: [Street Address ONLY - no town/postcode]
-- Town: [Town/City name only]
-- Post Code: [Code]
-- Phone: [Landline Number]
-- Mobile: [Mobile Number if different]
-- Email: [Email]
-- Source: [Source]
-
-Window Sills:
-1. Location: [Place]
-   Type: [Straight/C-shaped/Bay-Curve shaped/Conservatory ONLY]
-   Color: [Color name ONLY]
-   Size: [Size in mm]
-   U/Side: [Yes/No]
-
-2. Location: [Place]
-   Type: [Straight/C-shaped/Bay-Curve shaped/Conservatory ONLY]
-   Color: [Color name ONLY]
-   Size: [Size in mm]
-   U/Side: [Yes/No]
-
-[Continue for all window sills found]"""
-                                    },
-                                    {
-                                        "type": "image_url",
-                                        "image_url": {
-                                            "url": f"data:image/jpeg;base64,{base64_image}"
-                                        }
-                                    }
-                                ]
-                            }
-                        ],
-                        max_tokens=2000,
-                        temperature=0.3
-                    )
-                    extracted_text = response.choices[0].message.content
+                                }
+                            ]
+                        }
+                    ],
+                    max_tokens=2000,
+                    temperature=0.3
+                )
 
                 # Get text from response
                 self.logger.info("Received response from OpenAI API")
+                extracted_text = response.choices[0].message.content
                 self.logger.info(f"Extracted text length: {len(extracted_text)} characters")
                 
                 # Check if text contains required sections
