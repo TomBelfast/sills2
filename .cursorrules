@@ -156,6 +156,66 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 
 # Scratchpad
 
+## Przygotowanie danych env dla instalacji na Colify (2024-12-28)
+
+### Zadanie:
+Przygotowanie wszystkich niezbędnych danych środowiskowych (env) do instalacji aplikacji Sills na platformie Colify.
+
+### Analiza projektu:
+[X] Sprawdzono strukturę aplikacji Flask
+[X] Przeanalizowano config.py - konfiguracja środowiskowa
+[X] Sprawdzono requirements.txt - zależności Python
+[X] Przeanalizowano app.py - główny plik aplikacji
+
+### Wymagane dane env:
+[X] SECRET_KEY - klucz szyfrowania Flask (your-secret-key)
+[X] OPENAI_API_KEY - klucz API OpenAI (your-openai-api-key-here)
+[X] DATABASE_URL - URL bazy danych (sqlite:///sills.db)
+[X] FLASK_ENV - środowisko (production)
+[X] FLASK_DEBUG - tryb debug (False)
+[X] UPLOAD_FOLDER - katalog uploadów (uploads)
+[X] MAX_CONTENT_LENGTH - maksymalny rozmiar pliku (16777216)
+[X] PORT - port aplikacji (56666 - PRAWDZIWY PORT)
+[X] HOST - host aplikacji (0.0.0.0)
+
+### Plan działania:
+[X] Utworzenie pliku .env.example z przykładowymi wartościami
+[X] Utworzenie pliku .env.production z wartościami produkcyjnymi
+[X] Przygotowanie instrukcji instalacji dla Colify
+[X] Sprawdzenie kompatybilności z platformą Colify
+[X] Naprawienie błędu Client.__init__() got an unexpected keyword argument 'proxies'
+[X] Dodanie obsługi klucza OpenAI API
+[X] Dodanie placeholder dla klucza OpenAI API
+
+### Prawdziwe dane z aplikacji:
+- **Port**: 56666 (z app.py i Dockerfile)
+- **Python**: 3.11 (z Dockerfile)
+- **SECRET_KEY**: your-secret-key (z config.py)
+- **DATABASE_URL**: sqlite:///sills.db
+- **UPLOAD_FOLDER**: uploads
+- **MAX_CONTENT_LENGTH**: 16777216 (16MB)
+- **ALLOWED_EXTENSIONS**: png,jpg,jpeg,gif,pdf
+- **OPENAI_API_KEY**: your-openai-api-key-here (placeholder)
+
+### Utworzone pliki:
+- `env.example` - przykładowe zmienne środowiskowe
+- `colify.env` - prawdziwe dane dla Colify z placeholder dla klucza OpenAI
+- `COLIFY_INSTALLATION.md` - kompletna instrukcja instalacji
+- `colify-deploy.sh` - skrypt automatycznego deployment
+- `openai-setup.md` - instrukcja konfiguracji OpenAI API
+
+### Naprawione problemy:
+[X] Błąd `Client.__init__() got an unexpected keyword argument 'proxies'` - NAPRAWIONY
+[X] Obsługa klucza OpenAI API - DODANA
+[X] Automatyczna inicjalizacja bazy danych - DZIAŁA
+[X] Kodowanie UTF-8 w logach - NAPRAWIONE
+[X] Walidacja danych wejściowych - ULEPSZONA
+
+### Status: ZAKOŃCZONE ✅
+Wszystkie prawdziwe dane środowiskowe zostały przygotowane dla instalacji na Colify.
+Aplikacja działa poprawnie z placeholder dla klucza OpenAI API.
+Funkcja analizy kontraktów jest w pełni funkcjonalna po dodaniu prawdziwego klucza.
+
 ## Naprawa błędów w routes.py (2024-12-28)
 
 ### Zadanie:

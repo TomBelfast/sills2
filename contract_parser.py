@@ -16,8 +16,14 @@ class ContractParser:
         self.logger.info("Initializing ContractParser...")
         api_key = os.getenv('OPENAI_API_KEY')
         self.logger.info(f"API key loaded: {'SET' if api_key else 'NOT SET'}")
-        self.client = OpenAIClient(api_key=api_key)
-        self.logger.info("OpenAI client created successfully")
+        
+        if not api_key:
+            self.logger.warning("OpenAI API key not set. Contract analysis will be limited.")
+            self.client = None
+        else:
+            self.client = OpenAIClient(api_key=api_key)
+            self.logger.info("OpenAI client created successfully")
+        
         self.max_retries = 3
         self.retry_delay = 2
 
@@ -26,6 +32,11 @@ class ContractParser:
         Extracts text from an image using OpenAI API with retry mechanism.
         """
         self.logger.info(f"Starting text extraction from: {image_path}")
+        
+        if not self.client:
+            self.logger.error("OpenAI client not available. Please set OPENAI_API_KEY environment variable.")
+            raise ValueError("OpenAI API key not configured. Please set OPENAI_API_KEY environment variable to use contract analysis.")
+        
         last_error = None
         extracted_text = ""
 

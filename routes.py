@@ -594,7 +594,18 @@ def register_routes(app):
                 flash('Invalid UK postcode format', 'error')
                 return redirect(url_for('clients'))
 
-            new_client = Client(**client_data)
+            # Create Client instance manually to avoid **kwargs issues
+            new_client = Client()
+            new_client.first_name = client_data['first_name']
+            new_client.last_name = client_data['last_name']
+            new_client.phone = client_data['phone']
+            new_client.mobile = client_data['mobile']
+            new_client.email = client_data['email']
+            new_client.address = client_data['address']
+            new_client.town = client_data['town']
+            new_client.postal_code = client_data['postal_code']
+            new_client.source = client_data['source']
+            
             db.session.add(new_client)
             db.session.commit()
             flash('Client added successfully!', 'success')
@@ -705,20 +716,31 @@ def register_routes(app):
                 client = existing_client
                 logger.info(f"Using existing client: {first_name} {last_name}")
             else:
-                # Create new client
+                # Create new client - only use fields that exist in Client model
                 client_data = {
                     'first_name': first_name,
                     'last_name': last_name,
-                    'address': request.form.get('address'),
-                    'town': request.form.get('town'),
-                    'postal_code': request.form.get('postal_code'),
+                    'address': request.form.get('address', ''),
+                    'town': request.form.get('town', ''),
+                    'postal_code': request.form.get('postal_code', ''),
                     'phone': phone,
-                    'mobile': request.form.get('mobile'),
-                    'email': request.form.get('email'),
-                    'source': request.form.get('source')
+                    'mobile': request.form.get('mobile', ''),
+                    'email': request.form.get('email', ''),
+                    'source': request.form.get('source', '')
                 }
                 
-                client = Client(**client_data)
+                # Create Client instance manually to avoid **kwargs issues
+                client = Client()
+                client.first_name = client_data['first_name']
+                client.last_name = client_data['last_name']
+                client.address = client_data['address']
+                client.town = client_data['town']
+                client.postal_code = client_data['postal_code']
+                client.phone = client_data['phone']
+                client.mobile = client_data['mobile']
+                client.email = client_data['email']
+                client.source = client_data['source']
+                
                 db.session.add(client)
                 db.session.flush()
                 logger.info(f"Created new client: {first_name} {last_name} with phone: {phone}")

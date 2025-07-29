@@ -1,11 +1,13 @@
+import os
+import sys
+import logging
+import argparse
+from dotenv import load_dotenv
 from flask import Flask
 from config import Config
 from extensions import db, bootstrap, limiter, migrate
 from models import Client, Sill, Settings, MaterialPrices, DefaultSettings
 from routes import register_routes
-import logging
-import sys
-import os
 
 # Configure logging
 logging.basicConfig(
@@ -13,10 +15,29 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler('app.log')
+        logging.FileHandler('app.log', encoding='utf-8')
     ]
 )
 logger = logging.getLogger(__name__)
+
+def parse_arguments():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description='Sills Application - Window Sills Management System')
+    parser.add_argument('--openai-key', 
+                       help='OpenAI API key for contract analysis',
+                       type=str)
+    parser.add_argument('--port', 
+                       help='Port to run the application on (default: 56666)',
+                       type=int, 
+                       default=56666)
+    parser.add_argument('--host', 
+                       help='Host to run the application on (default: 0.0.0.0)',
+                       type=str, 
+                       default='0.0.0.0')
+    parser.add_argument('--debug', 
+                       help='Enable debug mode',
+                       action='store_true')
+    return parser.parse_args()
 
 def create_app(config_class=Config):
     """Create and configure the Flask application."""
@@ -126,11 +147,32 @@ def auto_manage_database(app):
             return False
 
 if __name__ == '__main__':
+    # Parse command line arguments
+    args = parse_arguments()
+    
+    # Set OpenAI API key from command line if provided
+    if args.openai_key:
+        os.environ['OPENAI_API_KEY'] = args.openai_key
+        logger.info("OpenAI API key set from command line argument")
+        logger.info(f"API key: {args.openai_key[:10]}...{args.openai_key[-4:] if len(args.openai_key) > 14 else '***'}")
+    
+    # Check if OpenAI API key is available
+    openai_key = os.getenv('OPENAI_API_KEY')
+    if openai_key:
+        logger.info("OpenAI API key is available - contract analysis enabled")
+    else:
+        logger.warning("No OpenAI API key found. Contract analysis will be limited.")
+        logger.info("To enable contract analysis, use one of these methods:")
+        logger.info("  1. Set environment variable: set OPENAI_API_KEY=your-api-key")
+        logger.info("  2. Use command line: python app.py --openai-key YOUR_API_KEY")
+        logger.info("  3. Create .env file with: OPENAI_API_KEY=your-api-key")
+    
     app = create_app()
     if init_db_connection(app):
         if auto_manage_database(app):
             logger.info("Database management completed successfully")
-            app.run(host='0.0.0.0', port=56666, debug=True)
+            logger.info(f"Starting application on {args.host}:{args.port}")
+            app.run(host=args.host, port=args.port, debug=args.debug)
         else:
             logger.error("Failed to manage database")
     else:
