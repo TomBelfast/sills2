@@ -1,12 +1,13 @@
-FROM python:3.11-slim
+FROM python:3.11-alpine
 
 WORKDIR /app
 
 # Install system dependencies for SQLite
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
     gcc \
-    sqlite3 \
-    && rm -rf /var/lib/apt/lists/*
+    musl-dev \
+    sqlite \
+    sqlite-dev
 
 # Copy requirements first for better caching
 COPY requirements.txt requirements.txt
@@ -28,7 +29,7 @@ ENV PORT=56666
 EXPOSE 56666
 
 # Create non-root user and set permissions
-RUN useradd -m -u 1000 appuser && \
+RUN adduser -D -u 1000 appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
